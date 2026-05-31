@@ -28,6 +28,8 @@ public partial class App : Application
     {
         // Services
         services.AddSingleton<ICsvOrderImporter, CsvOrderImporter>();
+        services.AddSingleton<IOrderDataService, OrderDataService>();
+        services.AddSingleton<IStatisticsService, StatisticsService>();
 
         // ViewModels + Views
         services.AddSingleton<MainViewModel>();

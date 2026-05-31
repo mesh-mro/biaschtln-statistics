@@ -23,13 +23,13 @@ Legende: ☐ offen · ✅ erledigt · 🔑 Fundament (blockiert andere) · ⭐ P
 - [x] `LoadFiles(paths)` → `ImportResult` (konkatenierte Liste + Pro-Datei-`FileLoadResult`); in DI registriert
 - [x] **Akzeptanz:** 6 Tests grün — 3 Dateien laden (1926/2475/2017 = 6418 Zeilen), `4,5`→`4.5m`, Datum/Bool/Nullables/Storno, fehlende Datei gemeldet
 
-## WP3 — Datenspeicher & Aggregations-Service
-- [ ] `IOrderDataService` (In-Memory-Store, meldet Änderungen)
-- [ ] `StatisticsService`: Umsatz/Anzahl je Kategorie & je Artikel (Top-N)
-- [ ] `StatisticsService`: Ø/Median/Max Zubereitungsdauer je Artikel
-- [ ] `StatisticsService`: Anzahl/Umsatz je Benutzer
-- [ ] Umsatzdefinition: Summe `Price` ohne Stornos (per Filter umstellbar)
-- [ ] **Akzeptanz:** Tests prüfen Aggregat-Summen gegen Sample-Daten
+## WP3 — Datenspeicher & Aggregations-Service ✅
+- [x] `IOrderDataService` + `OrderDataService` (In-Memory-Store, `OrdersChanged`-Event, `LoadFiles`/`Clear`); in DI
+- [x] `IStatisticsService` + `StatisticsService`: Umsatz/Anzahl je Kategorie & Top-N Artikel (Umsatz/Stückzahl)
+- [x] Ø/Median/Max Zubereitungsdauer je Artikel (nur Positionen mit Dauer)
+- [x] Anzahl/Umsatz je Benutzer; plus WP8-Vorrat: je Zahlungsmethode, je Tisch, Umsatz über Zeit, Stornoquote
+- [x] Service ist zustandslos und aggregiert die übergebene (gefilterte) Menge — Storno-Ausgrenzung ist Filter-Sache (WP4)
+- [x] **Akzeptanz:** 10 neue Tests grün (deterministischer Mini-Datensatz + Store gegen 6418 Sample-Zeilen)
 
 ## WP4 — Filter-Engine
 - [ ] `Models/OrderFilter.cs` (Zeitraum, Kategorien, Artikel, Tische, Benutzer, Zahlungsmethoden, Storno, bezahlt)
@@ -70,7 +70,7 @@ Legende: ☐ offen · ✅ erledigt · 🔑 Fundament (blockiert andere) · ⭐ P
 - [x] Testprojekt `tests/Biaschtln.Statistics.Tests` (xUnit, Target `net9.0-windows10.0.19041.0`)
 - [x] `samples/*.csv` via `<None Link>` + `CopyToOutputDirectory` eingebunden
 - [x] Import-Tests (WP2)
-- [ ] Aggregations-Tests (WP3)
+- [x] Aggregations-Tests (WP3) — `StatisticsServiceTests`, `OrderDataServiceTests`
 - [ ] Filter-Tests (WP4)
 
 ## WP11 — (Optional) Politur & README
