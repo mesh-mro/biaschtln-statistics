@@ -8,13 +8,13 @@ Legende: ☐ offen · ✅ erledigt · 🔑 Fundament (blockiert andere) · ⭐ P
 
 ---
 
-## WP1 — Solution- & Projekt-Setup 🔑
-- [ ] `Biaschtln.Statistics.sln` im Repo-Root anlegen
-- [ ] WPF-Projekt `src/Biaschtln.Statistics` (`TargetFramework=net9.0-windows10.0.19041.0`, `UseWPF=true`)
-- [ ] NuGet-Pakete hinzufügen: LiveChartsCore.SkiaSharpView.WPF 2.0.0, CommunityToolkit.Mvvm 8.4.2, CsvHelper 33.1.0, Microsoft.Extensions.DependencyInjection
-- [ ] DI-Container in `App.xaml.cs` aufsetzen (Services + ViewModels registrieren, MainWindow auflösen)
-- [ ] Ordnerstruktur anlegen (`Models/`, `Services/`, `ViewModels/`, `Views/`, `Converters/`)
-- [ ] **Akzeptanz:** Leeres Fenster startet, `dotnet build` grün
+## WP1 — Solution- & Projekt-Setup 🔑 ✅
+- [x] `Biaschtln.Statistics.slnx` im Repo-Root anlegen *(SDK 10 nutzt das neue `.slnx`-Format)*
+- [x] WPF-Projekt `src/Biaschtln.Statistics` (`TargetFramework=net9.0-windows10.0.19041.0`, `UseWPF=true`)
+- [x] NuGet-Pakete hinzufügen: LiveChartsCore.SkiaSharpView.WPF 2.0.0, CommunityToolkit.Mvvm 8.4.2, CsvHelper 33.1.0, Microsoft.Extensions.DependencyInjection 9.0.0
+- [x] DI-Container in `App.xaml.cs` aufsetzen (Services + ViewModels registrieren, MainWindow auflösen)
+- [x] `ViewModels/MainViewModel.cs` als MVVM-Geruest; weitere Ordner (`Models/`, `Services/`, `Views/`, `Converters/`) folgen mit Inhalt in WP2+
+- [x] **Akzeptanz:** App startet (Fenstertitel aus VM-Binding), `dotnet build` grün, 0 Warnungen
 
 ## WP2 — Datenmodell & CSV-Import
 - [ ] `Models/OrderLine.cs` mit allen 18 Feldern + abgeleitetem `IsCanceled`
