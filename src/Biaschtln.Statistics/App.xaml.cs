@@ -1,4 +1,5 @@
 using System.Windows;
+using Biaschtln.Statistics.Services;
 using Biaschtln.Statistics.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -25,6 +26,10 @@ public partial class App : Application
     /// </summary>
     private static void ConfigureServices(IServiceCollection services)
     {
+        // Services
+        services.AddSingleton<ICsvOrderImporter, CsvOrderImporter>();
+
+        // ViewModels + Views
         services.AddSingleton<MainViewModel>();
         services.AddSingleton<MainWindow>();
     }

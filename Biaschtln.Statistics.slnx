@@ -2,4 +2,7 @@
   <Folder Name="/src/">
     <Project Path="src/Biaschtln.Statistics/Biaschtln.Statistics.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Biaschtln.Statistics.Tests/Biaschtln.Statistics.Tests.csproj" />
+  </Folder>
 </Solution>

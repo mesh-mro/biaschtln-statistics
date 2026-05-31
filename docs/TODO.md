@@ -16,12 +16,12 @@ Legende: ☐ offen · ✅ erledigt · 🔑 Fundament (blockiert andere) · ⭐ P
 - [x] `ViewModels/MainViewModel.cs` als MVVM-Geruest; weitere Ordner (`Models/`, `Services/`, `Views/`, `Converters/`) folgen mit Inhalt in WP2+
 - [x] **Akzeptanz:** App startet (Fenstertitel aus VM-Binding), `dotnet build` grün, 0 Warnungen
 
-## WP2 — Datenmodell & CSV-Import
-- [ ] `Models/OrderLine.cs` mit allen 18 Feldern + abgeleitetem `IsCanceled`
-- [ ] `CsvOrderImporter` + `ClassMap<OrderLine>` (Delimiter `;`, Culture `de-DE`, BOM)
-- [ ] Bool-Konverter `WAHR/FALSCH`; `NULL`/leer → `null` bei nullable Feldern; Index-Spalte ignorieren
-- [ ] `LoadFiles(paths)` — konkateniert Zeilen, liefert Liste + pro-Datei-Status
-- [ ] **Akzeptanz:** Test lädt alle 3 `samples/`-Dateien (Zeilenanzahl, `4,5`→`4.5m`, Datum/Bool)
+## WP2 — Datenmodell & CSV-Import ✅
+- [x] `Models/OrderLine.cs` mit allen 18 Feldern + abgeleitetem `IsCanceled`
+- [x] `CsvOrderImporter` + `OrderLineMap : ClassMap<OrderLine>` (Delimiter `;`, Culture `de-DE`, BOM)
+- [x] `GermanBooleanConverter` (`WAHR/FALSCH`); `NULL`/leer → `null` (NullValues); Index-Spalte ignoriert; Datum per Format `yyyy-MM-dd HH:mm:ss` (Invariant)
+- [x] `LoadFiles(paths)` → `ImportResult` (konkatenierte Liste + Pro-Datei-`FileLoadResult`); in DI registriert
+- [x] **Akzeptanz:** 6 Tests grün — 3 Dateien laden (1926/2475/2017 = 6418 Zeilen), `4,5`→`4.5m`, Datum/Bool/Nullables/Storno, fehlende Datei gemeldet
 
 ## WP3 — Datenspeicher & Aggregations-Service
 - [ ] `IOrderDataService` (In-Memory-Store, meldet Änderungen)
@@ -66,10 +66,12 @@ Legende: ☐ offen · ✅ erledigt · 🔑 Fundament (blockiert andere) · ⭐ P
 - [ ] Chart als PNG (SkiaSharp)
 - [ ] CSV-Export der Aggregat-Tabellen
 
-## WP10 — Tests & Beispieldaten-Integration
-- [ ] Testprojekt `tests/Biaschtln.Statistics.Tests` (xUnit)
-- [ ] `samples/`-Dateien als `CopyToOutputDirectory` einbinden
-- [ ] Import-, Aggregations-, Filter-Tests
+## WP10 — Tests & Beispieldaten-Integration *(läuft mit)*
+- [x] Testprojekt `tests/Biaschtln.Statistics.Tests` (xUnit, Target `net9.0-windows10.0.19041.0`)
+- [x] `samples/*.csv` via `<None Link>` + `CopyToOutputDirectory` eingebunden
+- [x] Import-Tests (WP2)
+- [ ] Aggregations-Tests (WP3)
+- [ ] Filter-Tests (WP4)
 
 ## WP11 — (Optional) Politur & README
 - [ ] README mit Build-/Startanleitung
