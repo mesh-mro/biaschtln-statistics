@@ -31,11 +31,11 @@ Legende: ☐ offen · ✅ erledigt · 🔑 Fundament (blockiert andere) · ⭐ P
 - [x] Service ist zustandslos und aggregiert die übergebene (gefilterte) Menge — Storno-Ausgrenzung ist Filter-Sache (WP4)
 - [x] **Akzeptanz:** 10 neue Tests grün (deterministischer Mini-Datensatz + Store gegen 6418 Sample-Zeilen)
 
-## WP4 — Filter-Engine
-- [ ] `Models/OrderFilter.cs` (Zeitraum, Kategorien, Artikel, Tische, Benutzer, Zahlungsmethoden, Storno, bezahlt)
-- [ ] `OrderFilterService` (Predikat auf `IEnumerable<OrderLine>`)
-- [ ] `FilterViewModel` — Optionen dynamisch aus Daten (distinct), löst Refresh aus
-- [ ] **Akzeptanz:** Filteränderung aktualisiert Mengen reproduzierbar (Test)
+## WP4 — Filter-Engine ✅
+- [x] `Models/OrderFilter.cs` + `PaidFilter`-Enum (Zeitraum, Kategorien, Artikel, Tische, Benutzer, Zahlungsmethoden, Storno, bezahlt; leere Menge = alle)
+- [x] `IOrderFilterService` + `OrderFilterService` (AND-verknüpftes Predikat; Storno standardmäßig ausgeschlossen)
+- [x] `FilterViewModel` + `SelectableOption` — Optionen dynamisch aus Daten (distinct, sortiert, Auswahl bleibt bei Reload), `FilterChanged`-Event, `BuildFilter()`/`Reset()`; in DI
+- [x] **Akzeptanz:** 15 neue Tests grün (jedes Kriterium + Kombination, VM-Optionsaufbau/Event/Reset)
 
 ## WP5 — App-Shell, Datei-Laden-UI & Navigation
 - [ ] `MainWindow.xaml` — Toolbar (OpenFileDialog Multiselect), Filter-Sidebar, Tab-Navigation
@@ -71,7 +71,7 @@ Legende: ☐ offen · ✅ erledigt · 🔑 Fundament (blockiert andere) · ⭐ P
 - [x] `samples/*.csv` via `<None Link>` + `CopyToOutputDirectory` eingebunden
 - [x] Import-Tests (WP2)
 - [x] Aggregations-Tests (WP3) — `StatisticsServiceTests`, `OrderDataServiceTests`
-- [ ] Filter-Tests (WP4)
+- [x] Filter-Tests (WP4) — `OrderFilterServiceTests`, `FilterViewModelTests`
 
 ## WP11 — (Optional) Politur & README
 - [ ] README mit Build-/Startanleitung

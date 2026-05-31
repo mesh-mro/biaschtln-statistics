@@ -30,8 +30,10 @@ public partial class App : Application
         services.AddSingleton<ICsvOrderImporter, CsvOrderImporter>();
         services.AddSingleton<IOrderDataService, OrderDataService>();
         services.AddSingleton<IStatisticsService, StatisticsService>();
+        services.AddSingleton<IOrderFilterService, OrderFilterService>();
 
         // ViewModels + Views
+        services.AddSingleton<FilterViewModel>();
         services.AddSingleton<MainViewModel>();
         services.AddSingleton<MainWindow>();
     }
