@@ -9,6 +9,7 @@ using LiveChartsCore.Kernel.Sketches;
 using LiveChartsCore.Measure;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
+using SkiaSharp;
 
 namespace Biaschtln.Statistics.ViewModels;
 
@@ -120,26 +121,47 @@ public sealed partial class PreparationStaffViewModel : FilteredChartViewModel
     {
         // PreparationByArticle berücksichtigt nur Positionen mit gesetzter Dauer.
         var prep = _statistics.PreparationByArticle(orders).Take(TopDishes).ToList();
+        var averages = prep.Select(p => p.AverageSeconds).ToArray();
 
         PreparationSeries.Clear();
+
+        // Balkenhöhe = Ø-Dauer; der Ø-Wert steht oben am Balken.
         PreparationSeries.Add(new ColumnSeries<double>
         {
-            Values = prep.Select(p => p.AverageSeconds).ToArray(),
+            Values = averages,
             Name = "Ø Zubereitungsdauer",
             Fill = new SolidColorPaint(ChartPalette.SeriesOrange),
             Stroke = null,
             Rx = 4,
             Ry = 4,
+            IgnoresBarPosition = true,
             DataLabelsPaint = new SolidColorPaint(ChartPalette.Muted),
             DataLabelsSize = 11,
             DataLabelsPosition = DataLabelsPosition.Top,
-            DataLabelsFormatter = point => FormatDuration(point.Coordinate.PrimaryValue),
+            DataLabelsFormatter = point => "Ø " + FormatDuration(point.Coordinate.PrimaryValue),
             YToolTipLabelFormatter = point =>
             {
                 var p = prep[(int)point.Coordinate.SecondaryValue];
                 return $"Ø {FormatDuration(p.AverageSeconds)} · Median {FormatDuration(p.MedianSeconds)} · " +
                        $"Max {FormatDuration(p.MaxSeconds)} · n={p.Count}";
             },
+        });
+
+        // Unsichtbares Overlay: schreibt die Max-Dauer mittig in den Balken (nicht interaktiv).
+        PreparationSeries.Add(new ColumnSeries<double>
+        {
+            Values = averages,
+            Name = "Max",
+            Fill = new SolidColorPaint(SKColors.Transparent),
+            Stroke = null,
+            IgnoresBarPosition = true,
+            IsHoverable = false,
+            IsVisibleAtLegend = false,
+            DataLabelsPaint = new SolidColorPaint(ChartPalette.OnFill),
+            DataLabelsSize = 11,
+            DataLabelsPosition = DataLabelsPosition.Middle,
+            DataLabelsFormatter = point =>
+                "max " + FormatDuration(prep[(int)point.Coordinate.SecondaryValue].MaxSeconds),
         });
 
         _prepXAxis.Labels = prep.Select(p => p.Article).ToList();

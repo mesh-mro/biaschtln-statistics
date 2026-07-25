@@ -63,8 +63,9 @@ public sealed class PreparationStaffViewModelTests
         return (vm, data, filter);
     }
 
+    // Erste Serie = die Werte-Balken (bei der Zubereitung folgt ein unsichtbares Max-Overlay).
     private static double[] ColumnValues(IEnumerable<ISeries> series) =>
-        ((ColumnSeries<double>)series.Single()).Values!.ToArray();
+        ((ColumnSeries<double>)series.First()).Values!.ToArray();
 
     private static IReadOnlyList<string> Labels(IReadOnlyList<LiveChartsCore.Kernel.Sketches.ICartesianAxis> axes) =>
         ((Axis)axes[0]).Labels!.ToList();

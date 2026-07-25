@@ -28,7 +28,8 @@
 
         <!-- Ø Zubereitungsdauer je Gericht -->
         <DockPanel Grid.Row="0" Margin="0,0,0,8">
-            <TextBlock DockPanel.Dock="Top" Text="Ø Zubereitungsdauer je Gericht (nur Essen mit Dauer)"
+            <TextBlock DockPanel.Dock="Top"
+                       Text="Zubereitungsdauer je Gericht — Ø oben, Max im Balken (nur Essen mit Dauer)"
                        FontSize="15" FontWeight="SemiBold" Margin="0,0,0,8" />
             <lvc:CartesianChart Series="{Binding PreparationSeries}"
                                 XAxes="{Binding PreparationXAxes}"
