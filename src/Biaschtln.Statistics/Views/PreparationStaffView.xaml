@@ -1,0 +1,79 @@
+<UserControl x:Class="Biaschtln.Statistics.Views.PreparationStaffView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
+             xmlns:conv="clr-namespace:Biaschtln.Statistics.Converters"
+             xmlns:vm="clr-namespace:Biaschtln.Statistics.ViewModels"
+             mc:Ignorable="d"
+             d:DesignHeight="600" d:DesignWidth="900"
+             d:DataContext="{d:DesignInstance Type=vm:PreparationStaffViewModel}">
+    <UserControl.Resources>
+        <conv:EnumToBooleanConverter x:Key="EnumToBool" />
+    </UserControl.Resources>
+
+    <DockPanel Margin="8">
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal"
+                    HorizontalAlignment="Right" Margin="0,0,0,6">
+            <Button Content="Als PNG" Click="OnExportPng" Padding="8,2" Margin="0,0,6,0" />
+            <Button Content="Als CSV" Command="{Binding ExportCsvCommand}" Padding="8,2" />
+        </StackPanel>
+
+        <Grid x:Name="ExportRoot">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+        <!-- Ø Zubereitungsdauer je Gericht -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,8">
+            <TextBlock DockPanel.Dock="Top" Text="Ø Zubereitungsdauer je Gericht (nur Essen mit Dauer)"
+                       FontSize="15" FontWeight="SemiBold" Margin="0,0,0,8" />
+            <lvc:CartesianChart Series="{Binding PreparationSeries}"
+                                XAxes="{Binding PreparationXAxes}"
+                                YAxes="{Binding PreparationYAxes}" />
+        </DockPanel>
+
+        <!-- Positionen / Umsatz je Benutzer -->
+        <DockPanel Grid.Row="1">
+            <Grid DockPanel.Dock="Top" Margin="0,0,0,8">
+                <TextBlock Text="Je Benutzer" FontSize="15" FontWeight="SemiBold"
+                           VerticalAlignment="Center" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <TextBlock Text="Kennzahl:" VerticalAlignment="Center"
+                               Foreground="#757575" Margin="0,0,8,0" />
+                    <RadioButton Content="Positionen" GroupName="metric" Margin="0,0,10,0"
+                                 VerticalAlignment="Center"
+                                 IsChecked="{Binding StaffMetric, Converter={StaticResource EnumToBool},
+                                             ConverterParameter={x:Static vm:StaffMetric.Orders}}" />
+                    <RadioButton Content="Umsatz" GroupName="metric"
+                                 VerticalAlignment="Center"
+                                 IsChecked="{Binding StaffMetric, Converter={StaticResource EnumToBool},
+                                             ConverterParameter={x:Static vm:StaffMetric.Revenue}}" />
+                </StackPanel>
+            </Grid>
+            <lvc:CartesianChart Series="{Binding StaffSeries}"
+                                XAxes="{Binding StaffXAxes}"
+                                YAxes="{Binding StaffYAxes}" />
+        </DockPanel>
+
+        <!-- Leer-Anzeige, wenn keine (gefilterten) Daten vorliegen -->
+        <TextBlock Grid.RowSpan="2"
+                   Text="Keine Daten — bitte CSV laden oder Filter lockern."
+                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                   Foreground="#9E9E9E" FontSize="14">
+            <TextBlock.Style>
+                <Style TargetType="TextBlock">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding HasData}" Value="False">
+                            <Setter Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
+        </Grid>
+    </DockPanel>
+</UserControl>

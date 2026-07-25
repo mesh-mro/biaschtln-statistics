@@ -1,15 +1,213 @@
-﻿<Window x:Class="Biaschtln.Statistics.MainWindow"
+<Window x:Class="Biaschtln.Statistics.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Biaschtln.Statistics"
+        xmlns:sys="clr-namespace:System;assembly=System.Runtime"
+        xmlns:models="clr-namespace:Biaschtln.Statistics.Models"
+        xmlns:vm="clr-namespace:Biaschtln.Statistics.ViewModels"
+        xmlns:views="clr-namespace:Biaschtln.Statistics.Views"
         mc:Ignorable="d"
-        Title="{Binding Title}" Height="450" Width="800">
-    <Grid>
-        <TextBlock Text="{Binding Title}"
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Center"
-                   FontSize="20" />
-    </Grid>
+        Title="{Binding Title}" Height="720" Width="1180"
+        d:DataContext="{d:DesignInstance Type=vm:MainViewModel}">
+
+    <Window.Resources>
+        <!-- Aufzählung der Bezahlstatus-Werte für die Filter-ComboBox. -->
+        <ObjectDataProvider x:Key="PaidValues" MethodName="GetValues"
+                            ObjectType="{x:Type sys:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="models:PaidFilter" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+
+        <!-- Karte für eine Kennzahl im KPI-Kopf. -->
+        <Style x:Key="KpiCard" TargetType="Border">
+            <Setter Property="Background" Value="White" />
+            <Setter Property="BorderBrush" Value="#E0E0E0" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="Padding" Value="18,12" />
+            <Setter Property="Margin" Value="0,0,12,0" />
+            <Setter Property="MinWidth" Value="180" />
+        </Style>
+        <Style x:Key="KpiLabel" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#757575" />
+            <Setter Property="FontSize" Value="12" />
+        </Style>
+        <Style x:Key="KpiValue" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="26" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Margin" Value="0,2,0,0" />
+        </Style>
+
+        <!-- Checkbox-Liste für eine Filter-Optionsgruppe (scrollbar begrenzt). -->
+        <Style x:Key="FilterGroup" TargetType="GroupBox">
+            <Setter Property="Margin" Value="0,0,0,10" />
+        </Style>
+    </Window.Resources>
+
+    <DockPanel>
+        <!-- Toolbar -->
+        <ToolBarTray DockPanel.Dock="Top">
+            <ToolBar>
+                <Button Content="Dateien öffnen…" Command="{Binding OpenFilesCommand}"
+                        Padding="8,2" />
+                <Separator />
+                <TextBlock VerticalAlignment="Center" Margin="8,0"
+                           Text="{Binding StatusMessage}">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding HasError}" Value="True">
+                                    <Setter Property="Foreground" Value="#C62828" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </ToolBar>
+        </ToolBarTray>
+
+        <!-- KPI-Kopf -->
+        <Border DockPanel.Dock="Top" Background="#FAFAFA" BorderBrush="#E0E0E0"
+                BorderThickness="0,0,0,1" Padding="16,12">
+            <StackPanel Orientation="Horizontal">
+                <Border Style="{StaticResource KpiCard}">
+                    <StackPanel>
+                        <TextBlock Text="Bestellungen" Style="{StaticResource KpiLabel}" />
+                        <TextBlock Text="{Binding OrderCount}" Style="{StaticResource KpiValue}" />
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource KpiCard}">
+                    <StackPanel>
+                        <TextBlock Text="Positionen" Style="{StaticResource KpiLabel}" />
+                        <TextBlock Text="{Binding LineCount}" Style="{StaticResource KpiValue}" />
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource KpiCard}">
+                    <StackPanel>
+                        <TextBlock Text="Gesamtumsatz" Style="{StaticResource KpiLabel}" />
+                        <TextBlock Text="{Binding RevenueText}" Style="{StaticResource KpiValue}" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Border>
+
+        <!-- Filter-Sidebar -->
+        <Border DockPanel.Dock="Left" Width="280" Background="#F5F5F5"
+                BorderBrush="#E0E0E0" BorderThickness="0,0,1,0">
+            <DockPanel>
+                <Grid DockPanel.Dock="Top" Margin="12,12,12,6">
+                    <TextBlock Text="Filter" FontSize="15" FontWeight="SemiBold"
+                               VerticalAlignment="Center" />
+                    <Button Content="Zurücksetzen" HorizontalAlignment="Right"
+                            Padding="6,1" Command="{Binding Filter.ResetCommand}" />
+                </Grid>
+
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="12,0,12,12">
+                    <StackPanel>
+                        <!-- Zeitraum -->
+                        <GroupBox Header="Zeitraum" Style="{StaticResource FilterGroup}">
+                            <StackPanel>
+                                <TextBlock Text="Von" Margin="0,0,0,2" />
+                                <DatePicker SelectedDate="{Binding Filter.From}" />
+                                <TextBlock Text="Bis" Margin="0,6,0,2" />
+                                <DatePicker SelectedDate="{Binding Filter.To}" />
+                            </StackPanel>
+                        </GroupBox>
+
+                        <!-- Bezahlstatus / Storno -->
+                        <GroupBox Header="Bezahlstatus" Style="{StaticResource FilterGroup}">
+                            <StackPanel>
+                                <ComboBox ItemsSource="{Binding Source={StaticResource PaidValues}}"
+                                          SelectedItem="{Binding Filter.Paid}" />
+                                <CheckBox Content="Stornos einbeziehen" Margin="0,8,0,0"
+                                          IsChecked="{Binding Filter.IncludeCanceled}" />
+                            </StackPanel>
+                        </GroupBox>
+
+                        <!-- Kategorien -->
+                        <GroupBox Header="Kategorien" Style="{StaticResource FilterGroup}">
+                            <ItemsControl ItemsSource="{Binding Filter.Categories}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type vm:SelectableOption}">
+                                        <CheckBox Content="{Binding Name}"
+                                                  IsChecked="{Binding IsSelected}" Margin="0,1" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </GroupBox>
+
+                        <!-- Artikel -->
+                        <GroupBox Header="Artikel" Style="{StaticResource FilterGroup}">
+                            <ScrollViewer MaxHeight="180" VerticalScrollBarVisibility="Auto">
+                                <ItemsControl ItemsSource="{Binding Filter.Articles}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate DataType="{x:Type vm:SelectableOption}">
+                                            <CheckBox Content="{Binding Name}"
+                                                      IsChecked="{Binding IsSelected}" Margin="0,1" />
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </GroupBox>
+
+                        <!-- Tische -->
+                        <GroupBox Header="Tische" Style="{StaticResource FilterGroup}">
+                            <ScrollViewer MaxHeight="150" VerticalScrollBarVisibility="Auto">
+                                <ItemsControl ItemsSource="{Binding Filter.Tables}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate DataType="{x:Type vm:SelectableOption}">
+                                            <CheckBox Content="{Binding Name}"
+                                                      IsChecked="{Binding IsSelected}" Margin="0,1" />
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </GroupBox>
+
+                        <!-- Benutzer -->
+                        <GroupBox Header="Benutzer" Style="{StaticResource FilterGroup}">
+                            <ScrollViewer MaxHeight="150" VerticalScrollBarVisibility="Auto">
+                                <ItemsControl ItemsSource="{Binding Filter.Users}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate DataType="{x:Type vm:SelectableOption}">
+                                            <CheckBox Content="{Binding Name}"
+                                                      IsChecked="{Binding IsSelected}" Margin="0,1" />
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </GroupBox>
+
+                        <!-- Zahlungsmethoden -->
+                        <GroupBox Header="Zahlungsmethoden" Style="{StaticResource FilterGroup}">
+                            <ItemsControl ItemsSource="{Binding Filter.PaymentMethods}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type vm:SelectableOption}">
+                                        <CheckBox Content="{Binding Name}"
+                                                  IsChecked="{Binding IsSelected}" Margin="0,1" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </GroupBox>
+                    </StackPanel>
+                </ScrollViewer>
+            </DockPanel>
+        </Border>
+
+        <!-- Hauptbereich mit Tab-Navigation für die Diagrammseiten (WP6/WP7) -->
+        <TabControl Margin="12">
+            <TabItem Header="Umsatz nach Kategorie / Artikel">
+                <views:CategorySalesView DataContext="{Binding CategorySales}" />
+            </TabItem>
+            <TabItem Header="Zubereitung &amp; Personal">
+                <views:PreparationStaffView DataContext="{Binding PreparationStaff}" />
+            </TabItem>
+            <TabItem Header="Weitere Auswertungen">
+                <views:AnalyticsView DataContext="{Binding Analytics}" />
+            </TabItem>
+        </TabControl>
+    </DockPanel>
 </Window>

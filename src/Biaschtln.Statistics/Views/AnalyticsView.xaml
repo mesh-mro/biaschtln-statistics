@@ -1,0 +1,108 @@
+<UserControl x:Class="Biaschtln.Statistics.Views.AnalyticsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
+             xmlns:conv="clr-namespace:Biaschtln.Statistics.Converters"
+             xmlns:models="clr-namespace:Biaschtln.Statistics.Models"
+             xmlns:vm="clr-namespace:Biaschtln.Statistics.ViewModels"
+             mc:Ignorable="d"
+             d:DesignHeight="600" d:DesignWidth="1000"
+             d:DataContext="{d:DesignInstance Type=vm:AnalyticsViewModel}">
+    <UserControl.Resources>
+        <conv:EnumToBooleanConverter x:Key="EnumToBool" />
+    </UserControl.Resources>
+
+    <DockPanel Margin="8">
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal"
+                    HorizontalAlignment="Right" Margin="0,0,0,6">
+            <Button Content="Als PNG" Click="OnExportPng" Padding="8,2" Margin="0,0,6,0" />
+            <Button Content="Als CSV" Command="{Binding ExportCsvCommand}" Padding="8,2" />
+        </StackPanel>
+
+        <Grid x:Name="ExportRoot">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*" />
+                <ColumnDefinition Width="2*" />
+            </Grid.ColumnDefinitions>
+
+        <!-- Umsatz über Zeit -->
+        <DockPanel Grid.Row="0" Grid.Column="0" Margin="0,0,12,8">
+            <Grid DockPanel.Dock="Top" Margin="0,0,0,8">
+                <TextBlock Text="Umsatz über Zeit" FontSize="15" FontWeight="SemiBold"
+                           VerticalAlignment="Center" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <TextBlock Text="Intervall:" VerticalAlignment="Center"
+                               Foreground="#757575" Margin="0,0,8,0" />
+                    <RadioButton Content="Tag" GroupName="bucket" Margin="0,0,10,0"
+                                 VerticalAlignment="Center"
+                                 IsChecked="{Binding TimeBucket, Converter={StaticResource EnumToBool},
+                                             ConverterParameter={x:Static models:TimeBucket.Day}}" />
+                    <RadioButton Content="Stunde" GroupName="bucket"
+                                 VerticalAlignment="Center"
+                                 IsChecked="{Binding TimeBucket, Converter={StaticResource EnumToBool},
+                                             ConverterParameter={x:Static models:TimeBucket.Hour}}" />
+                </StackPanel>
+            </Grid>
+            <lvc:CartesianChart Series="{Binding RevenueOverTimeSeries}"
+                                XAxes="{Binding RevenueOverTimeXAxes}"
+                                YAxes="{Binding RevenueOverTimeYAxes}" />
+        </DockPanel>
+
+        <!-- Zahlungsmethoden -->
+        <DockPanel Grid.Row="0" Grid.Column="1" Margin="0,0,0,8">
+            <TextBlock DockPanel.Dock="Top" Text="Zahlungsmethoden" FontSize="15"
+                       FontWeight="SemiBold" Margin="0,0,0,8" />
+            <lvc:PieChart Series="{Binding PaymentSeries}" LegendPosition="Bottom" />
+        </DockPanel>
+
+        <!-- Umsatz je Tisch -->
+        <DockPanel Grid.Row="1" Grid.Column="0" Margin="0,0,12,0">
+            <TextBlock DockPanel.Dock="Top" Text="Umsatz je Tisch (Top 15)" FontSize="15"
+                       FontWeight="SemiBold" Margin="0,0,0,8" />
+            <lvc:CartesianChart Series="{Binding TableSeries}"
+                                XAxes="{Binding TableXAxes}"
+                                YAxes="{Binding TableYAxes}" />
+        </DockPanel>
+
+        <!-- Stornoquote -->
+        <DockPanel Grid.Row="1" Grid.Column="1">
+            <TextBlock DockPanel.Dock="Top" Text="Stornoquote" FontSize="15"
+                       FontWeight="SemiBold" Margin="0,0,0,8" />
+            <Border Background="White" BorderBrush="#E0E0E0" BorderThickness="1"
+                    CornerRadius="6" Padding="24">
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <TextBlock Text="{Binding CancellationRateText}" FontSize="46"
+                               FontWeight="SemiBold" HorizontalAlignment="Center"
+                               Foreground="#C62828" />
+                    <TextBlock Text="{Binding CancellationDetailText}" FontSize="13"
+                               Foreground="#757575" HorizontalAlignment="Center"
+                               Margin="0,6,0,0" />
+                </StackPanel>
+            </Border>
+        </DockPanel>
+
+        <!-- Leer-Anzeige -->
+        <TextBlock Grid.RowSpan="2" Grid.ColumnSpan="2"
+                   Text="Keine Daten — bitte CSV laden oder Filter lockern."
+                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                   Foreground="#9E9E9E" FontSize="14">
+            <TextBlock.Style>
+                <Style TargetType="TextBlock">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding HasData}" Value="False">
+                            <Setter Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
+        </Grid>
+    </DockPanel>
+</UserControl>

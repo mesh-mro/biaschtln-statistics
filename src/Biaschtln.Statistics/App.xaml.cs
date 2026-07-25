@@ -1,3 +1,4 @@
+using System.IO;
 using System.Windows;
 using Biaschtln.Statistics.Services;
 using Biaschtln.Statistics.ViewModels;
@@ -31,9 +32,14 @@ public partial class App : Application
         services.AddSingleton<IOrderDataService, OrderDataService>();
         services.AddSingleton<IStatisticsService, StatisticsService>();
         services.AddSingleton<IOrderFilterService, OrderFilterService>();
+        services.AddSingleton<IFileDialogService, FileDialogService>();
+        services.AddSingleton<ICsvExporter, CsvExporter>();
 
         // ViewModels + Views
         services.AddSingleton<FilterViewModel>();
+        services.AddSingleton<CategorySalesViewModel>();
+        services.AddSingleton<PreparationStaffViewModel>();
+        services.AddSingleton<AnalyticsViewModel>();
         services.AddSingleton<MainViewModel>();
         services.AddSingleton<MainWindow>();
     }
@@ -42,6 +48,13 @@ public partial class App : Application
     {
         base.OnStartup(e);
         _services.GetRequiredService<MainWindow>().Show();
+
+        // Als Startargumente übergebene CSV-Pfade direkt vorladen ("Öffnen mit"/Drag-auf-Exe).
+        var paths = e.Args.Where(File.Exists).ToArray();
+        if (paths.Length > 0)
+        {
+            _services.GetRequiredService<MainViewModel>().LoadPaths(paths);
+        }
     }
 
     protected override void OnExit(ExitEventArgs e)

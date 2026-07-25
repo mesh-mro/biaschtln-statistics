@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using Biaschtln.Statistics.Models;
 using Biaschtln.Statistics.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace Biaschtln.Statistics.ViewModels;
 
@@ -63,6 +64,7 @@ public partial class FilterViewModel : ObservableObject
     }
 
     /// <summary>Setzt alle Filterkriterien auf den Ausgangszustand zurück.</summary>
+    [RelayCommand]
     public void Reset()
     {
         _suppressChangeEvents = true;

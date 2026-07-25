@@ -37,34 +37,38 @@ Legende: ☐ offen · ✅ erledigt · 🔑 Fundament (blockiert andere) · ⭐ P
 - [x] `FilterViewModel` + `SelectableOption` — Optionen dynamisch aus Daten (distinct, sortiert, Auswahl bleibt bei Reload), `FilterChanged`-Event, `BuildFilter()`/`Reset()`; in DI
 - [x] **Akzeptanz:** 15 neue Tests grün (jedes Kriterium + Kombination, VM-Optionsaufbau/Event/Reset)
 
-## WP5 — App-Shell, Datei-Laden-UI & Navigation
-- [ ] `MainWindow.xaml` — Toolbar (OpenFileDialog Multiselect), Filter-Sidebar, Tab-Navigation
-- [ ] `MainViewModel` — `OpenFiles`-Command, Status/Fehler, Liste geladener Dateien
-- [ ] KPI-Kopf (Anzahl Bestellungen, Gesamtumsatz)
-- [ ] **Akzeptanz:** Mehrere CSVs laden → KPI korrekt, Filter befüllt
+## WP5 — App-Shell, Datei-Laden-UI & Navigation ✅
+- [x] `MainWindow.xaml` — Toolbar (OpenFileDialog Multiselect), Filter-Sidebar, Tab-Navigation
+- [x] `MainViewModel` — `OpenFiles`-Command, Status/Fehler, Liste geladener Dateien
+- [x] KPI-Kopf (Anzahl Bestellungen, Gesamtumsatz)
+- [x] `IFileDialogService`/`FileDialogService` — testbare Abstraktion des OpenFileDialog; in DI
+- [x] **Akzeptanz:** Mehrere CSVs laden → KPI korrekt, Filter befüllt (KPIs live bei Datei-/Filteränderung)
 
-## WP6 — Diagramme: Umsatz nach Kategorie / Artikel ⭐
-- [ ] `CategorySalesView` + ViewModel
-- [ ] Donut: Umsatzanteil je Kategorie (Alk/Anti/Essen)
-- [ ] Balken: Top-N Artikel nach Umsatz **und** Stückzahl (umschaltbar)
-- [ ] Bindung an `ObservableCollection`, reagiert live auf Filter
-- [ ] **Akzeptanz:** Werte = manuelle LINQ-Summe
+## WP6 — Diagramme: Umsatz nach Kategorie / Artikel ⭐ ✅
+- [x] `CategorySalesView` + ViewModel (`FilteredChartViewModel`-Basis, geteilte `ChartPalette`)
+- [x] Donut: Umsatzanteil je Kategorie (Alk/Anti/Essen) — CVD-geprüfte Farben, Farbe folgt Kategorie
+- [x] Balken: Top-N Artikel nach Umsatz **und** Stückzahl (umschaltbar via `EnumToBooleanConverter`)
+- [x] Bindung an `ObservableCollection<ISeries>`, reagiert live auf Filter (+ CSV-Vorladen per Startargument)
+- [x] **Akzeptanz:** 4 neue Tests grün (Donut = manuelle LINQ-Summe ohne Storno, Ranking-Toggle, Live-Filter, Leerzustand); visuell verifiziert gegen `samples/` (36.353 € Umsatz, 1043 Bestellungen)
 
-## WP7 — Diagramme: Zubereitungsdauer & Personal ⭐
-- [ ] `PreparationStaffView` + ViewModel
-- [ ] Balken: Ø Zubereitungsdauer je Gericht (nur Essen mit Dauer)
-- [ ] Balken: Bestellungen/Umsatz je Benutzer
-- [ ] **Akzeptanz:** Nur Zeilen mit Dauer fließen ein; Personalzahlen plausibel
+## WP7 — Diagramme: Zubereitungsdauer & Personal ⭐ ✅
+- [x] `PreparationStaffView` + ViewModel (`FilteredChartViewModel`-Basis)
+- [x] Balken: Ø Zubereitungsdauer je Gericht (nur Essen mit Dauer), Y-Achse als m:ss, Tooltip Ø/Median/Max/n
+- [x] Balken: Positionen/Umsatz je Benutzer (umschaltbar via `StaffMetric`/`EnumToBooleanConverter`)
+- [x] **Akzeptanz:** 5 neue Tests grün (nur Zeilen mit Dauer, Ø = manuelle LINQ, Metrik-Umschalter/Reorder, Live-Filter, Leerzustand); visuell verifiziert (Hendl mit Pommes Ø 2:53, Kellner 3 = 796 Positionen)
 
-## WP8 — (Optional) Weitere Auswertungen
-- [ ] Umsatz über Zeit (je Stunde/Tag)
-- [ ] Zahlungsmethoden-Verteilung
-- [ ] Umsatz je Tisch
-- [ ] Stornoquote
+## WP8 — (Optional) Weitere Auswertungen ✅
+- [x] Umsatz über Zeit (Linie, je Stunde/Tag umschaltbar) — `AnalyticsView` + `AnalyticsViewModel`
+- [x] Zahlungsmethoden-Verteilung (Donut, stabile Farbzuordnung übers Methoden-Universum)
+- [x] Umsatz je Tisch (Balken, Top 15)
+- [x] Stornoquote (Kachel, bewusst inkl. Stornos berechnet — Basisklasse mit Filter-Override)
+- [x] **Akzeptanz:** 4 neue Tests grün (Zahlung/Tisch/Zeit-Summen, Stornoquote inkl. Stornos); visuell verifiziert (Stornoquote 0,6 % = 38/6.418)
 
-## WP9 — (Optional) Export
-- [ ] Chart als PNG (SkiaSharp)
-- [ ] CSV-Export der Aggregat-Tabellen
+## WP9 — (Optional) Export ✅
+- [x] Chart als PNG (`ChartExport` via `RenderTargetBitmap` — View-seitig, ViewModels bleiben WPF-frei); Button je Seite
+- [x] CSV-Export der Aggregat-Tabellen (`ICsvExporter`/`CsvExporter`, Semikolon + de-DE + UTF-8-BOM); Button je Seite (WP6 Top-Artikel, WP7 Zubereitungsdauer, WP8 Umsatz über Zeit)
+- [x] `IFileDialogService.SaveFile` ergänzt
+- [x] **Akzeptanz:** 4 neue Tests grün (CSV-Render/-Schreiben/-Abbruch, VM-Command); PNG+CSV end-to-end verifiziert (gültige PNG-Signatur, CSV-Kopf `Article;Revenue;Quantity`)
 
 ## WP10 — Tests & Beispieldaten-Integration *(läuft mit)*
 - [x] Testprojekt `tests/Biaschtln.Statistics.Tests` (xUnit, Target `net9.0-windows10.0.19041.0`)
@@ -73,13 +77,13 @@ Legende: ☐ offen · ✅ erledigt · 🔑 Fundament (blockiert andere) · ⭐ P
 - [x] Aggregations-Tests (WP3) — `StatisticsServiceTests`, `OrderDataServiceTests`
 - [x] Filter-Tests (WP4) — `OrderFilterServiceTests`, `FilterViewModelTests`
 
-## WP11 — (Optional) Politur & README
-- [ ] README mit Build-/Startanleitung
-- [ ] Kurzdoku CSV-Format & Filter
+## WP11 — (Optional) Politur & README ✅
+- [x] README mit Build-/Startanleitung (inkl. CSV-Vorladen per Startargument)
+- [x] Kurzdoku CSV-Format & Filter (plus Projektstruktur, Stack, Export)
 
 ---
 
 ## End-to-End-Verifikation (Abschluss)
-- [ ] `dotnet build` grün (prüft .NET-9/SkiaSharp-Target)
-- [ ] `dotnet test` grün gegen `samples/`
-- [ ] App startet, lädt alle 3 `samples/*.csv`, KPI/Diagramme/Filter funktionieren live
+- [x] `dotnet build` grün (prüft .NET-9/SkiaSharp-Target) — 0 Warnungen
+- [x] `dotnet test` grün gegen `samples/` — 40 Tests
+- [x] App startet, lädt alle 3 `samples/*.csv`, KPI/Diagramme/Filter funktionieren live (visuell verifiziert; CSV-Vorladen per Startargument möglich)
