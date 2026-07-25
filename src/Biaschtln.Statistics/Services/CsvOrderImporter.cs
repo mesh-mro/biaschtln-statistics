@@ -25,6 +25,9 @@ public sealed class CsvOrderImporter : ICsvOrderImporter
 {
     private static readonly CultureInfo GermanCulture = CultureInfo.GetCultureInfo("de-DE");
 
+    /// <summary>Benutzer, dessen Zeilen reine Testbestellungen sind und beim Import entfallen.</summary>
+    private const string IgnoredUser = "Admin";
+
     public ImportResult LoadFiles(IEnumerable<string> paths)
     {
         var orders = new List<OrderLine>();
@@ -63,7 +66,11 @@ public sealed class CsvOrderImporter : ICsvOrderImporter
         using var reader = new StreamReader(path);
         using var csv = new CsvReader(reader, config);
         csv.Context.RegisterClassMap<OrderLineMap>();
-        return csv.GetRecords<OrderLine>().ToList();
+
+        // Testbestellungen des Admin-Benutzers werden generell ignoriert (schon beim Import).
+        return csv.GetRecords<OrderLine>()
+            .Where(o => !string.Equals(o.User, IgnoredUser, StringComparison.OrdinalIgnoreCase))
+            .ToList();
     }
 }
 

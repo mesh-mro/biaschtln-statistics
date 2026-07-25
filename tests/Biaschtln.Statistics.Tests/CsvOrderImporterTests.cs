@@ -9,8 +9,9 @@ public sealed class CsvOrderImporterTests
     private static readonly string SamplesDir =
         Path.Combine(AppContext.BaseDirectory, "samples");
 
-    // Verifizierte Datenzeilen-Anzahl je Beispieldatei (siehe docs/IMPLEMENTATION_PLAN.md §2).
-    private const int Rows1 = 1926; // Export_2026-05-08-23-16-14.csv
+    // Datenzeilen je Beispieldatei NACH Import (Admin-Testbestellungen werden ausgefiltert).
+    // Rohzeilen laut docs/IMPLEMENTATION_PLAN.md §2: 1926/2475/2017; Datei 1 enthält 2 Admin-Zeilen.
+    private const int Rows1 = 1924; // Export_2026-05-08-23-16-14.csv (1926 - 2 Admin)
     private const int Rows2 = 2475; // Export_2026-05-10-12-50-16.csv
     private const int Rows3 = 2017; // Export_2026-05-11-13-24-51.csv
 
@@ -29,6 +30,8 @@ public sealed class CsvOrderImporterTests
         Assert.True(result.AllSucceeded, "Alle Dateien sollten fehlerfrei laden.");
         Assert.Equal(3, result.Files.Count);
         Assert.Equal(Rows1 + Rows2 + Rows3, result.Orders.Count);
+        // Admin-Testbestellungen sind ausgefiltert.
+        Assert.DoesNotContain(result.Orders, o => string.Equals(o.User, "Admin", StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact]

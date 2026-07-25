@@ -21,16 +21,17 @@ public sealed class TablePickupSampleTests
         var filter = new OrderFilterService();
         var stats = new StatisticsService();
 
-        // Tisch A1 ohne Abholstations-Regel: enthält noch die Abhol-Positionen.
+        // Tisch A1 ohne Abholstations-Regel (Admin-Testbestellungen sind bereits beim Import
+        // entfernt): 907 Rohumsatz minus 9 € Admin = 898 €.
         var withPickup = filter
             .Apply(orders, new OrderFilter { Tables = { "A1" } })
             .ToList();
-        Assert.Equal(907m, stats.TotalRevenue(withPickup));
+        Assert.Equal(898m, stats.TotalRevenue(withPickup));
 
         // Mit Abholstation als Abholung: deren 522,50 € zählen dem Tisch A1 nicht mehr.
         var withoutPickup = filter
             .Apply(orders, new OrderFilter { Tables = { "A1" }, PickupUser = "Abholstation" })
             .ToList();
-        Assert.Equal(384.5m, stats.TotalRevenue(withoutPickup));
+        Assert.Equal(375.5m, stats.TotalRevenue(withoutPickup));
     }
 }

@@ -21,7 +21,7 @@ public sealed class OrderDataServiceTests
         var result = service.LoadFiles(AllSamples());
 
         Assert.True(result.AllSucceeded);
-        Assert.Equal(6418, service.Orders.Count);
+        Assert.Equal(6416, service.Orders.Count); // 6418 Rohzeilen minus 2 Admin-Testbestellungen
         Assert.Equal(result.Orders.Count, service.Orders.Count);
         Assert.Equal(1, raised);
     }
