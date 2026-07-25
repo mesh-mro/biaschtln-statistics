@@ -47,6 +47,8 @@ public partial class FilterViewModel : ObservableObject
             {
                 _pickup.PickupUser = value;
                 OnPropertyChanged();
+                // Abholstation beeinflusst den Tisch-Filter → alle Ansichten neu berechnen.
+                RaiseFilterChanged();
             }
         }
     }
@@ -75,6 +77,7 @@ public partial class FilterViewModel : ObservableObject
             To = To,
             IncludeCanceled = IncludeCanceled,
             Paid = Paid,
+            PickupUser = _pickup.PickupUser,
         };
 
         AddSelected(Categories, filter.Categories);

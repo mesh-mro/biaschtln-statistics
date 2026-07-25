@@ -40,6 +40,12 @@ public sealed class OrderFilter
     /// <summary>Erlaubte Zahlungsmethoden (leer = alle).</summary>
     public ISet<string> PaymentMethods { get; } = new HashSet<string>();
 
+    /// <summary>
+    /// Benutzer, dessen Bestellungen als Abholung gelten (kein Tischplatz). Solche Positionen
+    /// erfüllen keinen Tisch-Filter. Null/leer = keine Abholstation.
+    /// </summary>
+    public string? PickupUser { get; set; }
+
     /// <summary>Wenn false (Standard), werden stornierte Positionen ausgeschlossen.</summary>
     public bool IncludeCanceled { get; set; }
 

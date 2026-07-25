@@ -35,7 +35,8 @@ public sealed class OrderFilterService : IOrderFilterService
             return false;
         }
 
-        if (f.Tables.Count > 0 && !f.Tables.Contains(o.Table))
+        // Abhol-Bestellungen gehören keinem Tisch an → erfüllen keinen Tisch-Filter.
+        if (f.Tables.Count > 0 && (IsPickup(o, f.PickupUser) || !f.Tables.Contains(o.Table)))
         {
             return false;
         }
@@ -57,4 +58,8 @@ public sealed class OrderFilterService : IOrderFilterService
             _ => true,
         };
     }
+
+    private static bool IsPickup(OrderLine o, string? pickupUser) =>
+        !string.IsNullOrEmpty(pickupUser) &&
+        string.Equals(o.User, pickupUser, StringComparison.OrdinalIgnoreCase);
 }

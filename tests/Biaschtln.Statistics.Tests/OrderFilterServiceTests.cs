@@ -104,4 +104,23 @@ public sealed class OrderFilterServiceTests
         var filter = new OrderFilter { Categories = { "Alk" }, Paid = PaidFilter.OnlyPaid };
         Assert.Equal([1, 4], Ids(filter));
     }
+
+    [Fact]
+    public void TableFilter_ExcludesPickupUserOrders()
+    {
+        // Zwei Positionen am selben Tisch A1: eine von Kellner, eine von Abholstation.
+        var orders = new List<OrderLine>
+        {
+            Line(1, "Essen", "Schnitzel", "A1", "Kellner 1", "cash", paid: true, new DateTime(2026, 5, 9, 18, 0, 0)),
+            Line(2, "Essen", "Pommes", "A1", "Abholstation", "cash", paid: true, new DateTime(2026, 5, 9, 18, 30, 0)),
+        };
+
+        // Tisch-Filter A1 + Abholstation → nur die Kellner-Position (Abholung zählt keinem Tisch).
+        var atTable = new OrderFilter { Tables = { "A1" }, PickupUser = "Abholstation" };
+        Assert.Equal([1], _filter.Apply(orders, atTable).Select(o => o.OrderLineId).OrderBy(i => i).ToArray());
+
+        // Ohne Tisch-Filter bleibt die Abholung erhalten (echter Umsatz, nur ohne Tisch).
+        var noTable = new OrderFilter { PickupUser = "Abholstation" };
+        Assert.Equal([1, 2], _filter.Apply(orders, noTable).Select(o => o.OrderLineId).OrderBy(i => i).ToArray());
+    }
 }
