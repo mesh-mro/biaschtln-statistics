@@ -54,13 +54,26 @@ public sealed class AnalyticsViewModelTests
         Line("Alk", 4.5m, "B5", null, new DateTime(2026, 5, 9, 12, 30, 0), true),
     ];
 
-    private static (AnalyticsViewModel Vm, FakeOrderData Data) CreateVm()
+    private static OrderLine LineU(string category, decimal price, string table, string user) =>
+        new()
+        {
+            Category = category,
+            Article = category + "-" + table,
+            Price = price,
+            Table = table,
+            User = user,
+            Status = "ORDER: CREATED - Bestellung erfasst",
+        };
+
+    // Ein gemeinsames PickupSettings für Filter und VM — wie in der App (Singleton).
+    private static (AnalyticsViewModel Vm, FakeOrderData Data, PickupSettings Pickup) CreateVm()
     {
         var data = new FakeOrderData();
-        var filter = new FilterViewModel(data);
+        var pickup = new PickupSettings();
+        var filter = new FilterViewModel(data, pickup);
         var vm = new AnalyticsViewModel(
-            data, new OrderFilterService(), new StatisticsService(), filter, new NoopCsvExporter());
-        return (vm, data);
+            data, new OrderFilterService(), new StatisticsService(), filter, new NoopCsvExporter(), pickup);
+        return (vm, data, pickup);
     }
 
     private static decimal PieValue(IEnumerable<ISeries> series, string name) =>
@@ -75,7 +88,7 @@ public sealed class AnalyticsViewModelTests
     [Fact]
     public void PaymentDonut_SumsRevenuePerMethod_ExcludingCanceled()
     {
-        var (vm, data) = CreateVm();
+        var (vm, data, _) = CreateVm();
         data.Set(Sample());
 
         // cash = Bier 4,5 + Cola 3 = 7,5 · card = Schnitzel 9. Storno zählt nicht.
@@ -87,7 +100,7 @@ public sealed class AnalyticsViewModelTests
     [Fact]
     public void TableBars_RevenuePerTable_DescendingByRevenue()
     {
-        var (vm, data) = CreateVm();
+        var (vm, data, _) = CreateVm();
         data.Set(Sample());
 
         // A1 = 4,5 + 9 = 13,5 · B5 = 3 (Storno auf B5 ausgeschlossen).
@@ -97,7 +110,7 @@ public sealed class AnalyticsViewModelTests
     [Fact]
     public void RevenueOverTime_BucketsByDayAndHour()
     {
-        var (vm, data) = CreateVm();
+        var (vm, data, _) = CreateVm();
         data.Set(Sample());
 
         // Standard = Tag: 08.05. (13,5) und 09.05. (3) → 2 Punkte.
@@ -111,12 +124,33 @@ public sealed class AnalyticsViewModelTests
     [Fact]
     public void CancellationRate_IncludesCanceled_DespiteDefaultFilterExcludingThem()
     {
-        var (vm, data) = CreateVm();
+        var (vm, data, _) = CreateVm();
         data.Set(Sample());
 
         // 1 Storno von 4 Positionen → 25 %. Wichtig: trotz Standardfilter (ohne Stornos)
         // wird die Quote inkl. Stornos berechnet, sonst wäre sie immer 0.
         Assert.Equal("1 von 4 Positionen storniert", vm.CancellationDetailText);
         Assert.StartsWith("25", vm.CancellationRateText);
+    }
+
+    [Fact]
+    public void TableBars_ExcludePickupUser_AndReactToReconfiguration()
+    {
+        var (vm, data, pickup) = CreateVm();
+        data.Set(
+        [
+            LineU("Essen", 9m, "A1", "Kellner 1"),
+            LineU("Essen", 5m, "A1", "Abholstation"), // Abholung → zählt nicht zu A1
+            LineU("Alk", 4m, "B5", "Kellner 2"),
+        ]);
+
+        // Standard-Abholstation ausgeschlossen: A1 = 9 (nicht 14), B5 = 4.
+        Assert.Equal([9d, 4d], ColumnValues(vm.TableSeries));
+
+        // Anderen Benutzer als Abholstation definieren → Diagramm reagiert live.
+        pickup.PickupUser = "Kellner 1";
+
+        // Jetzt Kellner-1-Position (A1, 9) ausgeschlossen: A1 = 5, B5 = 4.
+        Assert.Equal([5d, 4d], ColumnValues(vm.TableSeries));
     }
 }

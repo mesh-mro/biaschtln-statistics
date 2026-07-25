@@ -57,7 +57,7 @@ public sealed class CategorySalesViewModelTests
     private static (CategorySalesViewModel Vm, FakeOrderData Data, FilterViewModel Filter) CreateVm()
     {
         var data = new FakeOrderData();
-        var filter = new FilterViewModel(data);
+        var filter = new FilterViewModel(data, new PickupSettings());
         var vm = new CategorySalesViewModel(
             data, new OrderFilterService(), new StatisticsService(), filter, new NoopCsvExporter());
         return (vm, data, filter);

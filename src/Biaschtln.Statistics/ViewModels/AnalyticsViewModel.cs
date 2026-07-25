@@ -27,6 +27,7 @@ public sealed partial class AnalyticsViewModel : FilteredChartViewModel
     private const string NoPayment = "(ohne)";
 
     private readonly IStatisticsService _statistics;
+    private readonly IPickupSettings _pickup;
     private IReadOnlyDictionary<string, SKColor> _paymentColors = new Dictionary<string, SKColor>();
     private readonly Axis _timeXAxis;
     private readonly Axis _timeYAxis;
@@ -38,10 +39,13 @@ public sealed partial class AnalyticsViewModel : FilteredChartViewModel
         IOrderFilterService filterService,
         IStatisticsService statistics,
         FilterViewModel filter,
-        ICsvExporter csvExporter)
+        ICsvExporter csvExporter,
+        IPickupSettings pickup)
         : base(data, filterService, filter, csvExporter)
     {
         _statistics = statistics;
+        _pickup = pickup;
+        _pickup.Changed += (_, _) => Refresh();
 
         _timeXAxis = new Axis
         {
@@ -198,7 +202,9 @@ public sealed partial class AnalyticsViewModel : FilteredChartViewModel
 
     private void BuildTableBars(IReadOnlyList<OrderLine> orders)
     {
-        var tables = _statistics.RevenueByTable(orders).Take(TopTables).ToList();
+        // Abhol-Bestellungen gehören keinem Tisch an und fließen daher nicht ein.
+        var atTable = orders.Where(o => !_pickup.IsPickup(o)).ToList();
+        var tables = _statistics.RevenueByTable(atTable).Take(TopTables).ToList();
 
         TableSeries.Clear();
         TableSeries.Add(new ColumnSeries<double>

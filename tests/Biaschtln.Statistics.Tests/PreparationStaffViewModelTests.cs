@@ -57,7 +57,7 @@ public sealed class PreparationStaffViewModelTests
     private static (PreparationStaffViewModel Vm, FakeOrderData Data, FilterViewModel Filter) CreateVm()
     {
         var data = new FakeOrderData();
-        var filter = new FilterViewModel(data);
+        var filter = new FilterViewModel(data, new PickupSettings());
         var vm = new PreparationStaffViewModel(
             data, new OrderFilterService(), new StatisticsService(), filter, new NoopCsvExporter());
         return (vm, data, filter);

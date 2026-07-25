@@ -63,7 +63,7 @@
 
         <!-- Umsatz je Tisch -->
         <DockPanel Grid.Row="1" Grid.Column="0" Margin="0,0,12,0">
-            <TextBlock DockPanel.Dock="Top" Text="Umsatz je Tisch (Top 15)" FontSize="15"
+            <TextBlock DockPanel.Dock="Top" Text="Umsatz je Tisch (Top 15, ohne Abholung)" FontSize="15"
                        FontWeight="SemiBold" Margin="0,0,0,8" />
             <lvc:CartesianChart Series="{Binding TableSeries}"
                                 XAxes="{Binding TableXAxes}"

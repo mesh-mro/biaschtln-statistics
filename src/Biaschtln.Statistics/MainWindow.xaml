@@ -181,6 +181,17 @@
                             </ScrollViewer>
                         </GroupBox>
 
+                        <!-- Abholstation (deren Bestellungen zählen keinem Tisch) -->
+                        <GroupBox Header="Abholung (kein Tisch)" Style="{StaticResource FilterGroup}">
+                            <StackPanel>
+                                <TextBlock Text="Benutzer, dessen Bestellungen keinem Tisch zugerechnet werden:"
+                                           TextWrapping="Wrap" Foreground="#757575" Margin="0,0,0,4" />
+                                <ComboBox ItemsSource="{Binding Filter.UserNames}"
+                                          Text="{Binding Filter.PickupUser, UpdateSourceTrigger=LostFocus}"
+                                          IsEditable="True" />
+                            </StackPanel>
+                        </GroupBox>
+
                         <!-- Zahlungsmethoden -->
                         <GroupBox Header="Zahlungsmethoden" Style="{StaticResource FilterGroup}">
                             <ItemsControl ItemsSource="{Binding Filter.PaymentMethods}">

@@ -59,7 +59,7 @@ public sealed class CsvExporterTests
     public void CategorySales_ExportCsvCommand_InvokesExporterWithRankingName()
     {
         var data = new FakeOrderDataForExport();
-        var filter = new FilterViewModel(data);
+        var filter = new FilterViewModel(data, new PickupSettings());
         var recorder = new NoopCsvExporter();
         var vm = new CategorySalesViewModel(
             data, new OrderFilterService(), new StatisticsService(), filter, recorder)

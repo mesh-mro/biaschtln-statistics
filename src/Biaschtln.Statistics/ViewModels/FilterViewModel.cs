@@ -14,11 +14,13 @@ namespace Biaschtln.Statistics.ViewModels;
 public partial class FilterViewModel : ObservableObject
 {
     private readonly IOrderDataService _data;
+    private readonly IPickupSettings _pickup;
     private bool _suppressChangeEvents;
 
-    public FilterViewModel(IOrderDataService data)
+    public FilterViewModel(IOrderDataService data, IPickupSettings pickup)
     {
         _data = data;
+        _pickup = pickup;
         _data.OrdersChanged += (_, _) => RebuildOptions();
         RebuildOptions();
     }
@@ -28,6 +30,26 @@ public partial class FilterViewModel : ObservableObject
     public ObservableCollection<SelectableOption> Tables { get; } = [];
     public ObservableCollection<SelectableOption> Users { get; } = [];
     public ObservableCollection<SelectableOption> PaymentMethods { get; } = [];
+
+    /// <summary>Benutzernamen (für die Abholstation-Auswahl).</summary>
+    public ObservableCollection<string> UserNames { get; } = [];
+
+    /// <summary>
+    /// Der als Abholstation geltende Benutzer (dessen Bestellungen keinem Tisch zählen).
+    /// Schreibt in die geteilten <see cref="IPickupSettings"/>.
+    /// </summary>
+    public string PickupUser
+    {
+        get => _pickup.PickupUser;
+        set
+        {
+            if (value is not null && value != _pickup.PickupUser)
+            {
+                _pickup.PickupUser = value;
+                OnPropertyChanged();
+            }
+        }
+    }
 
     [ObservableProperty]
     private DateTime? _from;
@@ -100,12 +122,15 @@ public partial class FilterViewModel : ObservableObject
                 .Select(o => o.PaymentMethod)
                 .Where(m => !string.IsNullOrWhiteSpace(m))
                 .Cast<string>());
+            SyncNames(UserNames, _data.Orders.Select(o => o.User));
         }
         finally
         {
             _suppressChangeEvents = false;
         }
 
+        // Damit die ComboBox den Abholstation-Benutzer nach dem (Neu-)Laden wieder auswählt.
+        OnPropertyChanged(nameof(PickupUser));
         RaiseFilterChanged();
     }
 
@@ -125,6 +150,17 @@ public partial class FilterViewModel : ObservableObject
             {
                 IsSelected = selected.Contains(value),
             });
+        }
+    }
+
+    /// <summary>Aktualisiert eine String-Liste auf die eindeutigen, sortierten Werte.</summary>
+    private static void SyncNames(ObservableCollection<string> target, IEnumerable<string> values)
+    {
+        var distinct = values.Distinct().OrderBy(v => v, StringComparer.CurrentCulture).ToList();
+        target.Clear();
+        foreach (var value in distinct)
+        {
+            target.Add(value);
         }
     }
 

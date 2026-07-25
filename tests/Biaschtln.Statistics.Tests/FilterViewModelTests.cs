@@ -50,7 +50,7 @@ public sealed class FilterViewModelTests
     public void RebuildOptions_BuildsDistinctSortedOptionsFromData()
     {
         var data = new FakeOrderData();
-        var vm = new FilterViewModel(data);
+        var vm = new FilterViewModel(data, new PickupSettings());
 
         data.Set(Sample());
 
@@ -66,7 +66,7 @@ public sealed class FilterViewModelTests
     public void BuildFilter_ReflectsSelectionsAndProperties()
     {
         var data = new FakeOrderData();
-        var vm = new FilterViewModel(data);
+        var vm = new FilterViewModel(data, new PickupSettings());
         data.Set(Sample());
 
         vm.Categories.First(o => o.Name == "Alk").IsSelected = true;
@@ -86,7 +86,7 @@ public sealed class FilterViewModelTests
     public void FilterChanged_RaisedOnSelectionAndPropertyChanges()
     {
         var data = new FakeOrderData();
-        var vm = new FilterViewModel(data);
+        var vm = new FilterViewModel(data, new PickupSettings());
         data.Set(Sample());
 
         var raised = 0;
@@ -102,7 +102,7 @@ public sealed class FilterViewModelTests
     public void Reset_ClearsSelectionsAndProperties_AndRaisesOnce()
     {
         var data = new FakeOrderData();
-        var vm = new FilterViewModel(data);
+        var vm = new FilterViewModel(data, new PickupSettings());
         data.Set(Sample());
         vm.Categories.First().IsSelected = true;
         vm.Paid = PaidFilter.OnlyUnpaid;
@@ -121,7 +121,7 @@ public sealed class FilterViewModelTests
     public void Sync_PreservesSelectionAcrossDataReload()
     {
         var data = new FakeOrderData();
-        var vm = new FilterViewModel(data);
+        var vm = new FilterViewModel(data, new PickupSettings());
         data.Set(Sample());
         vm.Categories.First(o => o.Name == "Alk").IsSelected = true;
 

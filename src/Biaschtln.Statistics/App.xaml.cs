@@ -34,6 +34,7 @@ public partial class App : Application
         services.AddSingleton<IOrderFilterService, OrderFilterService>();
         services.AddSingleton<IFileDialogService, FileDialogService>();
         services.AddSingleton<ICsvExporter, CsvExporter>();
+        services.AddSingleton<IPickupSettings, PickupSettings>();
 
         // ViewModels + Views
         services.AddSingleton<FilterViewModel>();
