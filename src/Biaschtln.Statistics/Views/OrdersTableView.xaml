@@ -1,0 +1,79 @@
+<UserControl x:Class="Biaschtln.Statistics.Views.OrdersTableView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:Biaschtln.Statistics.ViewModels"
+             xmlns:conv="clr-namespace:Biaschtln.Statistics.Converters"
+             mc:Ignorable="d"
+             d:DesignHeight="500" d:DesignWidth="900"
+             d:DataContext="{d:DesignInstance Type=vm:OrdersTableViewModel}">
+    <UserControl.Resources>
+        <conv:SecondsToDurationConverter x:Key="SecondsToDuration" />
+    </UserControl.Resources>
+    <DockPanel Margin="8">
+        <Grid DockPanel.Dock="Top" Margin="0,0,0,6">
+            <TextBlock VerticalAlignment="Center" FontWeight="SemiBold"
+                       Text="{Binding RowCount, StringFormat='{}{0:N0} Positionen'}" />
+            <Button Content="Als CSV" Command="{Binding ExportCsvCommand}"
+                    HorizontalAlignment="Right" Padding="8,2" />
+        </Grid>
+
+        <Grid>
+            <DataGrid ItemsSource="{Binding Rows}"
+                      AutoGenerateColumns="False" IsReadOnly="True"
+                      CanUserSortColumns="True" CanUserReorderColumns="True"
+                      SelectionMode="Extended" SelectionUnit="FullRow"
+                      GridLinesVisibility="Horizontal" HeadersVisibility="Column"
+                      EnableRowVirtualization="True" EnableColumnVirtualization="True"
+                      RowHeight="24" FontSize="12">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Zeitpunkt" Width="130"
+                                        Binding="{Binding Zeitpunkt, StringFormat='{}{0:dd.MM.yyyy HH:mm}'}"
+                                        SortMemberPath="Zeitpunkt" />
+                    <DataGridTextColumn Header="Bestellung" Width="80"
+                                        Binding="{Binding Bestellung}" />
+                    <DataGridTextColumn Header="Tisch" Width="70" Binding="{Binding Tisch}" />
+                    <DataGridTextColumn Header="Kategorie" Width="85" Binding="{Binding Kategorie}" />
+                    <DataGridTextColumn Header="Preis" Width="85"
+                                        Binding="{Binding Preis, StringFormat='{}{0:C2}', ConverterCulture=de-DE}">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Right" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Header="Zubereitung" Width="108" SortMemberPath="Zubereitung"
+                                        Binding="{Binding Zubereitung, Converter={StaticResource SecondsToDuration}}">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Right" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Header="Benutzer" Width="110" Binding="{Binding Benutzer}" />
+                    <DataGridTextColumn Header="Artikel" Width="*" MinWidth="180" Binding="{Binding Artikel}" />
+                    <DataGridTextColumn Header="Zahlung" Width="85" Binding="{Binding Zahlung}" />
+                    <DataGridCheckBoxColumn Header="Bezahlt" Width="60" Binding="{Binding Bezahlt}" />
+                    <DataGridCheckBoxColumn Header="Storno" Width="60" Binding="{Binding Storno}" />
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <!-- Leer-Anzeige, wenn keine (gefilterten) Daten vorliegen -->
+            <TextBlock Text="Keine Daten — bitte CSV laden oder Filter lockern."
+                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                       Foreground="#9E9E9E" FontSize="14">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding HasData}" Value="False">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+        </Grid>
+    </DockPanel>
+</UserControl>

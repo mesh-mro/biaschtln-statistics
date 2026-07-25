@@ -41,6 +41,7 @@ public partial class App : Application
         services.AddSingleton<CategorySalesViewModel>();
         services.AddSingleton<PreparationStaffViewModel>();
         services.AddSingleton<AnalyticsViewModel>();
+        services.AddSingleton<OrdersTableViewModel>();
         services.AddSingleton<MainViewModel>();
         services.AddSingleton<MainWindow>();
     }

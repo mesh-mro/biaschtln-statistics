@@ -30,7 +30,8 @@ public partial class MainViewModel : ObservableObject
         FilterViewModel filter,
         CategorySalesViewModel categorySales,
         PreparationStaffViewModel preparationStaff,
-        AnalyticsViewModel analytics)
+        AnalyticsViewModel analytics,
+        OrdersTableViewModel ordersTable)
     {
         _data = data;
         _statistics = statistics;
@@ -40,6 +41,7 @@ public partial class MainViewModel : ObservableObject
         CategorySales = categorySales;
         PreparationStaff = preparationStaff;
         Analytics = analytics;
+        OrdersTable = ordersTable;
 
         Filter.FilterChanged += (_, _) => RecomputeKpis();
         _data.OrdersChanged += (_, _) => RecomputeKpis();
@@ -59,6 +61,9 @@ public partial class MainViewModel : ObservableObject
 
     /// <summary>ViewModel der Seite "Weitere Auswertungen" (WP8).</summary>
     public AnalyticsViewModel Analytics { get; }
+
+    /// <summary>ViewModel der Datentabelle (alle gefilterten Positionen).</summary>
+    public OrdersTableViewModel OrdersTable { get; }
 
     /// <summary>Namen der zuletzt geladenen Dateien.</summary>
     public ObservableCollection<string> LoadedFiles { get; } = [];

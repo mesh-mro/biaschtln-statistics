@@ -219,6 +219,9 @@
             <TabItem Header="Weitere Auswertungen">
                 <views:AnalyticsView DataContext="{Binding Analytics}" />
             </TabItem>
+            <TabItem Header="Positionen">
+                <views:OrdersTableView DataContext="{Binding OrdersTable}" />
+            </TabItem>
         </TabControl>
     </DockPanel>
 </Window>
