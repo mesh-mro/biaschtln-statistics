@@ -97,7 +97,9 @@ public sealed class StatisticsService : IStatisticsService
 
     private static DateTime Truncate(DateTime value, TimeBucket bucket) => bucket switch
     {
-        TimeBucket.Day => value.Date,
+        TimeBucket.Minute => new DateTime(value.Year, value.Month, value.Day, value.Hour, value.Minute, 0, value.Kind),
+        TimeBucket.QuarterHour => new DateTime(
+            value.Year, value.Month, value.Day, value.Hour, value.Minute - (value.Minute % 15), 0, value.Kind),
         _ => new DateTime(value.Year, value.Month, value.Day, value.Hour, 0, 0, value.Kind),
     };
 

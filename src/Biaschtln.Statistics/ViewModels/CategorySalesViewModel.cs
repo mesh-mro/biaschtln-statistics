@@ -84,7 +84,7 @@ public sealed partial class CategorySalesViewModel : FilteredChartViewModel
     private void ExportCsv()
     {
         var rows = _statistics.TopArticles(FilteredOrders(), TopN, ArticleRanking);
-        var suffix = ArticleRanking == ArticleRanking.Revenue ? "umsatz" : "stueckzahl";
+        var suffix = ArticleRanking == ArticleRanking.Revenue ? "umsatz" : "positionen";
         CsvExporter.ExportCsv(rows, $"top-artikel-{suffix}");
     }
 
@@ -133,7 +133,7 @@ public sealed partial class CategorySalesViewModel : FilteredChartViewModel
         ArticleSeries.Add(new ColumnSeries<double>
         {
             Values = values,
-            Name = byRevenue ? "Umsatz" : "Stückzahl",
+            Name = byRevenue ? "Umsatz" : "Positionen",
             Fill = new SolidColorPaint(ChartPalette.SeriesBlue),
             Stroke = null,
             Rx = 4,
@@ -146,7 +146,7 @@ public sealed partial class CategorySalesViewModel : FilteredChartViewModel
                 : point.Coordinate.PrimaryValue.ToString("N0", German),
             YToolTipLabelFormatter = point => byRevenue
                 ? ((decimal)point.Coordinate.PrimaryValue).ToString("C2", German)
-                : $"{point.Coordinate.PrimaryValue.ToString("N0", German)} Stk.",
+                : $"{point.Coordinate.PrimaryValue.ToString("N0", German)} Pos.",
         });
 
         _articleXAxis.Labels = top.Select(a => a.Article).ToList();

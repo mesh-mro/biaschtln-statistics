@@ -2,6 +2,7 @@ using Biaschtln.Statistics.Models;
 using Biaschtln.Statistics.Services;
 using Biaschtln.Statistics.ViewModels;
 using LiveChartsCore;
+using LiveChartsCore.Defaults;
 using LiveChartsCore.SkiaSharpView;
 
 namespace Biaschtln.Statistics.Tests;
@@ -76,14 +77,14 @@ public sealed class AnalyticsViewModelTests
         return (vm, data, pickup);
     }
 
-    private static decimal PieValue(IEnumerable<ISeries> series, string name) =>
-        series.Cast<PieSeries<decimal>>().Single(s => s.Name == name).Values!.Single();
+    private static double PieValue(IEnumerable<ISeries> series, string name) =>
+        series.Cast<PieSeries<double>>().Single(s => s.Name == name).Values!.Single();
 
     private static double[] ColumnValues(IEnumerable<ISeries> series) =>
         ((ColumnSeries<double>)series.Single()).Values!.ToArray();
 
-    private static double[] LineValues(IEnumerable<ISeries> series) =>
-        ((LineSeries<double>)series.Single()).Values!.ToArray();
+    private static double[] TimeSeriesValues(IEnumerable<ISeries> series) =>
+        ((ColumnSeries<DateTimePoint>)series.Single()).Values!.Select(p => p.Value ?? 0d).ToArray();
 
     [Fact]
     public void PaymentDonut_SumsRevenuePerMethod_ExcludingCanceled()
@@ -93,8 +94,8 @@ public sealed class AnalyticsViewModelTests
 
         // cash = Bier 4,5 + Cola 3 = 7,5 · card = Schnitzel 9. Storno zählt nicht.
         Assert.Equal(2, vm.PaymentSeries.Count);
-        Assert.Equal(7.5m, PieValue(vm.PaymentSeries, "cash"));
-        Assert.Equal(9m, PieValue(vm.PaymentSeries, "card"));
+        Assert.Equal(7.5d, PieValue(vm.PaymentSeries, "cash"));
+        Assert.Equal(9d, PieValue(vm.PaymentSeries, "card"));
     }
 
     [Fact]
@@ -108,17 +109,19 @@ public sealed class AnalyticsViewModelTests
     }
 
     [Fact]
-    public void RevenueOverTime_BucketsByDayAndHour()
+    public void RevenueOverTime_DefaultsToQuarterHour_AndReactsToInterval()
     {
         var (vm, data, _) = CreateVm();
         data.Set(Sample());
 
-        // Standard = Tag: 08.05. (13,5) und 09.05. (3) → 2 Punkte.
-        Assert.Equal([13.5d, 3d], LineValues(vm.RevenueOverTimeSeries));
+        // Standard = 15 Minuten: 18:00 (4,5), 19:00 (9), 12:00 (3) → 3 chronologische Punkte
+        // (Storno um 12:30 ausgeschlossen).
+        Assert.Equal(TimeBucket.QuarterHour, vm.TimeBucket);
+        Assert.Equal([4.5d, 9d, 3d], TimeSeriesValues(vm.RevenueOverTimeSeries));
 
-        vm.TimeBucket = TimeBucket.Hour;
-        // Stunde: 18h, 19h, 12h (Storno um 12:30 ausgeschlossen) → 3 Punkte.
-        Assert.Equal(3, LineValues(vm.RevenueOverTimeSeries).Length);
+        // Umschalten auf Minute: hier ebenfalls 3 Punkte (Zeitpunkte in verschiedenen Minuten).
+        vm.TimeBucket = TimeBucket.Minute;
+        Assert.Equal(3, TimeSeriesValues(vm.RevenueOverTimeSeries).Length);
     }
 
     [Fact]
@@ -131,6 +134,26 @@ public sealed class AnalyticsViewModelTests
         // wird die Quote inkl. Stornos berechnet, sonst wäre sie immer 0.
         Assert.Equal("1 von 4 Positionen storniert", vm.CancellationDetailText);
         Assert.StartsWith("25", vm.CancellationRateText);
+    }
+
+    [Fact]
+    public void Metric_Count_SwitchesQuantitativeChartsToPositionCounts()
+    {
+        var (vm, data, _) = CreateVm();
+        data.Set(Sample());
+
+        vm.Metric = ChartMetric.Count;
+
+        // Tisch nach Anzahl: A1 2 Positionen, B5 1 (Storno ausgeschlossen).
+        Assert.Equal([2d, 1d], ColumnValues(vm.TableSeries));
+        // Zahlungsmethoden nach Anzahl: cash 2, card 1.
+        Assert.Equal(2d, PieValue(vm.PaymentSeries, "cash"));
+        Assert.Equal(1d, PieValue(vm.PaymentSeries, "card"));
+        // Über Zeit (Stunde): drei Buckets mit je 1 Position.
+        Assert.Equal([1d, 1d, 1d], TimeSeriesValues(vm.RevenueOverTimeSeries));
+        // Titel spiegeln die Kennzahl.
+        Assert.Equal("Positionen je Tisch (Top 15, ohne Abholung)", vm.TableChartTitle);
+        Assert.Equal("Positionen über Zeit", vm.TimeChartTitle);
     }
 
     [Fact]

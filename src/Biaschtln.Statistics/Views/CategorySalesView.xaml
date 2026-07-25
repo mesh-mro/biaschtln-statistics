@@ -34,7 +34,7 @@
             <lvc:PieChart Series="{Binding CategorySeries}" LegendPosition="Bottom" />
         </DockPanel>
 
-        <!-- Balken: Top-Artikel nach Umsatz / Stückzahl -->
+        <!-- Balken: Top-Artikel nach Umsatz / Positionen -->
         <DockPanel Grid.Column="1">
             <Grid DockPanel.Dock="Top" Margin="0,0,0,8">
                 <TextBlock Text="Top-Artikel" FontSize="15" FontWeight="SemiBold"
@@ -46,7 +46,7 @@
                                  VerticalAlignment="Center"
                                  IsChecked="{Binding ArticleRanking, Converter={StaticResource EnumToBool},
                                              ConverterParameter={x:Static models:ArticleRanking.Revenue}}" />
-                    <RadioButton Content="Stückzahl" GroupName="rank"
+                    <RadioButton Content="Positionen" GroupName="rank"
                                  VerticalAlignment="Center"
                                  IsChecked="{Binding ArticleRanking, Converter={StaticResource EnumToBool},
                                              ConverterParameter={x:Static models:ArticleRanking.Quantity}}" />

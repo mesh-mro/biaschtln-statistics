@@ -98,7 +98,7 @@ public sealed class CategorySalesViewModelTests
         // Standard: nach Umsatz absteigend → Schnitzel (18), Bier (13,5), Cola (3).
         Assert.Equal([18d, 13.5d, 3d], ColumnValues(vm.ArticleSeries));
 
-        // Umschalten auf Stückzahl → Bier (3), Schnitzel (2), Cola (1).
+        // Umschalten auf Positionen → Bier (3), Schnitzel (2), Cola (1).
         vm.ArticleRanking = ArticleRanking.Quantity;
         Assert.Equal([3d, 2d, 1d], ColumnValues(vm.ArticleSeries));
     }

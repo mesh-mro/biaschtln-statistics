@@ -13,16 +13,6 @@ using SkiaSharp;
 
 namespace Biaschtln.Statistics.ViewModels;
 
-/// <summary>Kennzahl für die Personal-Auswertung.</summary>
-public enum StaffMetric
-{
-    /// <summary>Anzahl bearbeiteter Positionen je Benutzer.</summary>
-    Orders,
-
-    /// <summary>Umsatz je Benutzer.</summary>
-    Revenue,
-}
-
 /// <summary>
 /// ViewModel für "Zubereitung &amp; Personal" (WP7): ein Balkendiagramm der Ø
 /// Zubereitungsdauer je Gericht (nur Positionen mit gesetzter Dauer) und eines für
@@ -92,13 +82,13 @@ public sealed partial class PreparationStaffViewModel : FilteredChartViewModel
 
     /// <summary>Umschaltung Personal-Kennzahl (Positionen oder Umsatz).</summary>
     [ObservableProperty]
-    private StaffMetric _staffMetric = StaffMetric.Orders;
+    private ChartMetric _metric = ChartMetric.Count;
 
     /// <summary>False, wenn die gefilterte Menge leer ist (steuert die Leer-Anzeige).</summary>
     [ObservableProperty]
     private bool _hasData;
 
-    partial void OnStaffMetricChanged(StaffMetric value) => Refresh();
+    partial void OnMetricChanged(ChartMetric value) => Refresh();
 
     /// <summary>Exportiert die Zubereitungsdauer-Tabelle (je Gericht) als CSV.</summary>
     [RelayCommand]
@@ -169,7 +159,7 @@ public sealed partial class PreparationStaffViewModel : FilteredChartViewModel
 
     private void BuildStaffBars(IReadOnlyList<OrderLine> orders)
     {
-        var byRevenue = StaffMetric == StaffMetric.Revenue;
+        var byRevenue = Metric == ChartMetric.Revenue;
         var users = _statistics.RevenueByUser(orders);
 
         // RevenueByUser ist nach Positionsanzahl sortiert; bei Umsatz-Ansicht danach ordnen.

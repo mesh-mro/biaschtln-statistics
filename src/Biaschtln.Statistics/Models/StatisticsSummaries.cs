@@ -13,8 +13,14 @@ public enum ArticleRanking
 /// <summary>Zeitliche Gruppierung für Umsatz-über-Zeit-Auswertungen.</summary>
 public enum TimeBucket
 {
+    /// <summary>Je Stunde.</summary>
     Hour,
-    Day,
+
+    /// <summary>Je 15 Minuten.</summary>
+    QuarterHour,
+
+    /// <summary>Je Minute.</summary>
+    Minute,
 }
 
 /// <summary>Umsatz und Anzahl je Kategorie (Alk/Anti/Essen).</summary>

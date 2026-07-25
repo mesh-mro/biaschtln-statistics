@@ -70,7 +70,7 @@ public sealed class CsvExporterTests
         vm.ExportCsvCommand.Execute(null);
 
         Assert.Equal(1, recorder.ExportCalls);
-        Assert.Equal("top-artikel-stueckzahl", recorder.LastSuggestedName);
+        Assert.Equal("top-artikel-positionen", recorder.LastSuggestedName);
     }
 
     /// <summary>Kleiner Datenservice nur für den Kommando-Test.</summary>

@@ -128,4 +128,38 @@ public sealed class StatisticsServiceTests
             b => { Assert.Equal(new DateTime(2026, 5, 9, 18, 0, 0), b.BucketStart); Assert.Equal(12m, b.Revenue); Assert.Equal(2, b.Count); },
             b => { Assert.Equal(new DateTime(2026, 5, 9, 19, 0, 0), b.BucketStart); Assert.Equal(9m, b.Revenue); Assert.Equal(1, b.Count); });
     }
+
+    [Fact]
+    public void RevenueOverTime_BucketsByQuarterHour()
+    {
+        var orders = new List<OrderLine>
+        {
+            new() { Price = 5m, OrderedAt = new DateTime(2026, 5, 9, 18, 3, 0) },
+            new() { Price = 7m, OrderedAt = new DateTime(2026, 5, 9, 18, 12, 0) }, // gleiche Viertelstunde 18:00
+            new() { Price = 9m, OrderedAt = new DateTime(2026, 5, 9, 18, 20, 0) }, // Viertelstunde 18:15
+        };
+
+        var result = _stats.RevenueOverTime(orders, TimeBucket.QuarterHour);
+
+        Assert.Collection(result,
+            b => { Assert.Equal(new DateTime(2026, 5, 9, 18, 0, 0), b.BucketStart); Assert.Equal(12m, b.Revenue); Assert.Equal(2, b.Count); },
+            b => { Assert.Equal(new DateTime(2026, 5, 9, 18, 15, 0), b.BucketStart); Assert.Equal(9m, b.Revenue); Assert.Equal(1, b.Count); });
+    }
+
+    [Fact]
+    public void RevenueOverTime_BucketsByMinute()
+    {
+        var orders = new List<OrderLine>
+        {
+            new() { Price = 5m, OrderedAt = new DateTime(2026, 5, 9, 18, 3, 10) },
+            new() { Price = 7m, OrderedAt = new DateTime(2026, 5, 9, 18, 3, 50) }, // gleiche Minute 18:03
+            new() { Price = 9m, OrderedAt = new DateTime(2026, 5, 9, 18, 4, 5) },
+        };
+
+        var result = _stats.RevenueOverTime(orders, TimeBucket.Minute);
+
+        Assert.Collection(result,
+            b => { Assert.Equal(new DateTime(2026, 5, 9, 18, 3, 0), b.BucketStart); Assert.Equal(12m, b.Revenue); Assert.Equal(2, b.Count); },
+            b => { Assert.Equal(new DateTime(2026, 5, 9, 18, 4, 0), b.BucketStart); Assert.Equal(9m, b.Revenue); Assert.Equal(1, b.Count); });
+    }
 }

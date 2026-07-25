@@ -102,7 +102,7 @@ public sealed class PreparationStaffViewModelTests
         var (vm, data, _) = CreateVm();
         data.Set(Sample());
 
-        vm.StaffMetric = StaffMetric.Revenue;
+        vm.Metric = ChartMetric.Revenue;
 
         // Nach Umsatz absteigend: K3 (50), K1 (21), K2 (8,5).
         Assert.Equal([50d, 21d, 8.5d], ColumnValues(vm.StaffSeries));

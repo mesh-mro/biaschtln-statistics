@@ -15,11 +15,24 @@
     </UserControl.Resources>
 
     <DockPanel Margin="8">
-        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal"
-                    HorizontalAlignment="Right" Margin="0,0,0,6">
-            <Button Content="Als PNG" Click="OnExportPng" Padding="8,2" Margin="0,0,6,0" />
-            <Button Content="Als CSV" Command="{Binding ExportCsvCommand}" Padding="8,2" />
-        </StackPanel>
+        <Grid DockPanel.Dock="Top" Margin="0,0,0,6">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
+                <TextBlock Text="Kennzahl:" VerticalAlignment="Center"
+                           Foreground="#757575" Margin="0,0,8,0" />
+                <RadioButton Content="Umsatz" GroupName="metric" Margin="0,0,10,0"
+                             VerticalAlignment="Center"
+                             IsChecked="{Binding Metric, Converter={StaticResource EnumToBool},
+                                         ConverterParameter={x:Static vm:ChartMetric.Revenue}}" />
+                <RadioButton Content="Positionen" GroupName="metric"
+                             VerticalAlignment="Center"
+                             IsChecked="{Binding Metric, Converter={StaticResource EnumToBool},
+                                         ConverterParameter={x:Static vm:ChartMetric.Count}}" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Als PNG" Click="OnExportPng" Padding="8,2" Margin="0,0,6,0" />
+                <Button Content="Als CSV" Command="{Binding ExportCsvCommand}" Padding="8,2" />
+            </StackPanel>
+        </Grid>
 
         <Grid x:Name="ExportRoot">
             <Grid.RowDefinitions>
@@ -34,19 +47,23 @@
         <!-- Umsatz über Zeit -->
         <DockPanel Grid.Row="0" Grid.Column="0" Margin="0,0,12,8">
             <Grid DockPanel.Dock="Top" Margin="0,0,0,8">
-                <TextBlock Text="Umsatz über Zeit" FontSize="15" FontWeight="SemiBold"
+                <TextBlock Text="{Binding TimeChartTitle}" FontSize="15" FontWeight="SemiBold"
                            VerticalAlignment="Center" />
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <TextBlock Text="Intervall:" VerticalAlignment="Center"
                                Foreground="#757575" Margin="0,0,8,0" />
-                    <RadioButton Content="Tag" GroupName="bucket" Margin="0,0,10,0"
-                                 VerticalAlignment="Center"
-                                 IsChecked="{Binding TimeBucket, Converter={StaticResource EnumToBool},
-                                             ConverterParameter={x:Static models:TimeBucket.Day}}" />
-                    <RadioButton Content="Stunde" GroupName="bucket"
+                    <RadioButton Content="Stunde" GroupName="bucket" Margin="0,0,10,0"
                                  VerticalAlignment="Center"
                                  IsChecked="{Binding TimeBucket, Converter={StaticResource EnumToBool},
                                              ConverterParameter={x:Static models:TimeBucket.Hour}}" />
+                    <RadioButton Content="15 Min" GroupName="bucket" Margin="0,0,10,0"
+                                 VerticalAlignment="Center"
+                                 IsChecked="{Binding TimeBucket, Converter={StaticResource EnumToBool},
+                                             ConverterParameter={x:Static models:TimeBucket.QuarterHour}}" />
+                    <RadioButton Content="Minute" GroupName="bucket"
+                                 VerticalAlignment="Center"
+                                 IsChecked="{Binding TimeBucket, Converter={StaticResource EnumToBool},
+                                             ConverterParameter={x:Static models:TimeBucket.Minute}}" />
                 </StackPanel>
             </Grid>
             <lvc:CartesianChart Series="{Binding RevenueOverTimeSeries}"
@@ -63,7 +80,7 @@
 
         <!-- Umsatz je Tisch -->
         <DockPanel Grid.Row="1" Grid.Column="0" Margin="0,0,12,0">
-            <TextBlock DockPanel.Dock="Top" Text="Umsatz je Tisch (Top 15, ohne Abholung)" FontSize="15"
+            <TextBlock DockPanel.Dock="Top" Text="{Binding TableChartTitle}" FontSize="15"
                        FontWeight="SemiBold" Margin="0,0,0,8" />
             <lvc:CartesianChart Series="{Binding TableSeries}"
                                 XAxes="{Binding TableXAxes}"
