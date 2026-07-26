@@ -1,0 +1,51 @@
+<Window x:Class="Biaschtln.Statistics.AboutWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:Biaschtln.Statistics.ViewModels"
+        mc:Ignorable="d"
+        Title="Info" Height="Auto" Width="420"
+        SizeToContent="Height" ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
+        d:DataContext="{d:DesignInstance Type=vm:AboutViewModel}">
+    <Border Padding="24" Background="White">
+        <StackPanel>
+            <TextBlock Text="{Binding ProductName}" FontSize="22" FontWeight="SemiBold" />
+            <TextBlock Text="{Binding Description}" Foreground="#616161" TextWrapping="Wrap"
+                       Margin="0,6,0,0" />
+
+            <Grid Margin="0,18,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Version" Foreground="#9E9E9E"
+                           Margin="0,0,16,6" />
+                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Version}" Margin="0,0,0,6" />
+
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Hersteller" Foreground="#9E9E9E"
+                           Margin="0,0,16,6" />
+                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Company}" Margin="0,0,0,6" />
+
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="Lizenz" Foreground="#9E9E9E"
+                           Margin="0,0,16,6" />
+                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding License}" Margin="0,0,0,6" />
+
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="Copyright" Foreground="#9E9E9E"
+                           Margin="0,0,16,0" />
+                <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Copyright}" TextWrapping="Wrap" />
+            </Grid>
+
+            <Button Content="OK" IsDefault="True" IsCancel="True" Click="OnOk"
+                    HorizontalAlignment="Right" MinWidth="88" Padding="10,4" Margin="0,20,0,0" />
+        </StackPanel>
+    </Border>
+</Window>

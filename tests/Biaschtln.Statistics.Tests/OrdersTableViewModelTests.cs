@@ -12,7 +12,11 @@ public sealed class OrdersTableViewModelTests
 
         public event EventHandler? OrdersChanged;
 
-        public ImportResult LoadFiles(IEnumerable<string> paths) => throw new NotSupportedException();
+        public IReadOnlyList<LoadedFileInfo> LoadedFiles { get; } = [];
+
+        public ImportResult LoadFiles(IEnumerable<string> paths, bool append = false) => throw new NotSupportedException();
+
+        public void RemoveFile(string filePath) => throw new NotSupportedException();
 
         public void Clear()
         {

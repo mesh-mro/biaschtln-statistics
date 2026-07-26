@@ -15,12 +15,8 @@ public sealed class OrderFilterService : IOrderFilterService
             return false;
         }
 
-        if (f.From.HasValue && o.OrderedAt < f.From.Value)
-        {
-            return false;
-        }
-
-        if (f.To.HasValue && o.OrderedAt > f.To.Value)
+        if (!string.IsNullOrEmpty(f.File) &&
+            !string.Equals(o.SourceFile, f.File, StringComparison.Ordinal))
         {
             return false;
         }

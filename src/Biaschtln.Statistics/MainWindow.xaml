@@ -48,10 +48,39 @@
     </Window.Resources>
 
     <DockPanel>
+        <!-- Menüleiste -->
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_Datei">
+                <MenuItem Header="Dateien _hinzufügen…" Command="{Binding AddFilesCommand}" />
+                <MenuItem Header="Öffnen (_ersetzen)…" Command="{Binding ReplaceFilesCommand}" />
+                <Separator />
+                <MenuItem Header="_Geöffnete Dateien" ItemsSource="{Binding LoadedFiles}"
+                          IsEnabled="{Binding HasLoadedFiles}">
+                    <MenuItem.ItemContainerStyle>
+                        <Style TargetType="MenuItem">
+                            <Setter Property="Header" Value="{Binding Display}" />
+                            <Setter Property="ToolTip" Value="Klicken, um diese Datei zu entfernen" />
+                            <Setter Property="Command"
+                                    Value="{Binding DataContext.RemoveFileCommand,
+                                            RelativeSource={RelativeSource AncestorType=Menu}}" />
+                            <Setter Property="CommandParameter" Value="{Binding}" />
+                        </Style>
+                    </MenuItem.ItemContainerStyle>
+                </MenuItem>
+                <MenuItem Header="Alle _schließen" Command="{Binding ClearCommand}"
+                          IsEnabled="{Binding HasLoadedFiles}" />
+                <Separator />
+                <MenuItem Header="_Beenden" Click="OnExit" />
+            </MenuItem>
+            <MenuItem Header="_Hilfe">
+                <MenuItem Header="_Info…" Click="OnShowAbout" />
+            </MenuItem>
+        </Menu>
+
         <!-- Toolbar -->
         <ToolBarTray DockPanel.Dock="Top">
             <ToolBar>
-                <Button Content="Dateien öffnen…" Command="{Binding OpenFilesCommand}"
+                <Button Content="Dateien hinzufügen…" Command="{Binding AddFilesCommand}"
                         Padding="8,2" />
                 <Separator />
                 <TextBlock VerticalAlignment="Center" Margin="8,0"
@@ -107,14 +136,10 @@
 
                 <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="12,0,12,12">
                     <StackPanel>
-                        <!-- Zeitraum -->
-                        <GroupBox Header="Zeitraum" Style="{StaticResource FilterGroup}">
-                            <StackPanel>
-                                <TextBlock Text="Von" Margin="0,0,0,2" />
-                                <DatePicker SelectedDate="{Binding Filter.From}" />
-                                <TextBlock Text="Bis" Margin="0,6,0,2" />
-                                <DatePicker SelectedDate="{Binding Filter.To}" />
-                            </StackPanel>
+                        <!-- Datei (eine Datei = i. d. R. ein Veranstaltungstag) -->
+                        <GroupBox Header="Datei" Style="{StaticResource FilterGroup}">
+                            <ComboBox ItemsSource="{Binding Filter.Files}"
+                                      SelectedItem="{Binding Filter.SelectedFile}" />
                         </GroupBox>
 
                         <!-- Bezahlstatus / Storno -->

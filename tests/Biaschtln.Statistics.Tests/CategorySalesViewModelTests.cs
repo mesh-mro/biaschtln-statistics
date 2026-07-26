@@ -15,7 +15,11 @@ public sealed class CategorySalesViewModelTests
 
         public event EventHandler? OrdersChanged;
 
-        public ImportResult LoadFiles(IEnumerable<string> paths) => throw new NotSupportedException();
+        public IReadOnlyList<LoadedFileInfo> LoadedFiles { get; } = [];
+
+        public ImportResult LoadFiles(IEnumerable<string> paths, bool append = false) => throw new NotSupportedException();
+
+        public void RemoveFile(string filePath) => throw new NotSupportedException();
 
         public void Clear()
         {
@@ -124,11 +128,8 @@ public sealed class CategorySalesViewModelTests
         data.Set(Sample());
         Assert.True(vm.HasData);
 
-        // Filter, der nichts durchlässt (nicht existierende Kategorie).
-        filter.Categories.Single(o => o.Name == "Anti").IsSelected = true;
-        filter.Users.Clear(); // keine Nutzer-Optionen; nur zur Sicherheit
-        // Zeitfenster in der Zukunft → leere Menge.
-        filter.From = new DateTime(2099, 1, 1, 0, 0, 0);
+        // Filter, der nichts durchlässt: nicht vorhandene Datei → leere Menge.
+        filter.SelectedFile = "gibt-es-nicht.csv";
 
         Assert.False(vm.HasData);
         Assert.Empty(vm.CategorySeries);

@@ -68,8 +68,15 @@ public sealed class CsvOrderImporter : ICsvOrderImporter
         csv.Context.RegisterClassMap<OrderLineMap>();
 
         // Testbestellungen des Admin-Benutzers werden generell ignoriert (schon beim Import).
+        // Jede Position wird mit ihrem Dateinamen gestempelt (für den Datei-Filter).
+        var fileName = Path.GetFileName(path);
         return csv.GetRecords<OrderLine>()
             .Where(o => !string.Equals(o.User, IgnoredUser, StringComparison.OrdinalIgnoreCase))
+            .Select(o =>
+            {
+                o.SourceFile = fileName;
+                return o;
+            })
             .ToList();
     }
 }

@@ -18,7 +18,7 @@ public sealed class OrderFilterServiceTests
     ];
 
     private static OrderLine Line(int id, string category, string article, string table, string user,
-        string? payment, bool paid, DateTime orderedAt, bool canceled = false) =>
+        string? payment, bool paid, DateTime orderedAt, bool canceled = false, string? sourceFile = null) =>
         new()
         {
             OrderLineId = id,
@@ -29,6 +29,7 @@ public sealed class OrderFilterServiceTests
             PaymentMethod = payment,
             IsPaid = paid,
             OrderedAt = orderedAt,
+            SourceFile = sourceFile ?? string.Empty,
             Status = canceled ? "ORDER: CANCELED - Bestellung STORNO" : "ORDER: CREATED - Bestellung erfasst",
         };
 
@@ -82,13 +83,23 @@ public sealed class OrderFilterServiceTests
     }
 
     [Fact]
-    public void DateRange_IsInclusive()
+    public void FileFilter_MatchesOnlySelectedFile_AndEmptyMeansAll()
     {
-        var filter = new OrderFilter { From = new DateTime(2026, 5, 10, 0, 0, 0), IncludeCanceled = true };
-        Assert.Equal([3, 4], Ids(filter));
+        var orders = new List<OrderLine>
+        {
+            Line(1, "Alk", "Bier 0,5", "A1", "K1", "cash", paid: true, new DateTime(2026, 5, 9, 18, 0, 0), sourceFile: "tag1.csv"),
+            Line(2, "Essen", "Schnitzel", "A1", "K2", "card", paid: true, new DateTime(2026, 5, 10, 19, 0, 0), sourceFile: "tag2.csv"),
+        };
 
-        var upTo = new OrderFilter { To = new DateTime(2026, 5, 9, 19, 0, 0) };
-        Assert.Equal([1, 2], Ids(upTo));
+        int[] Apply(OrderFilter f) =>
+            _filter.Apply(orders, f).Select(o => o.OrderLineId).OrderBy(i => i).ToArray();
+
+        // Leerer Datei-Filter = alle Dateien.
+        Assert.Equal([1, 2], Apply(new OrderFilter()));
+
+        // Genau eine Datei.
+        Assert.Equal([1], Apply(new OrderFilter { File = "tag1.csv" }));
+        Assert.Equal([2], Apply(new OrderFilter { File = "tag2.csv" }));
     }
 
     [Fact]

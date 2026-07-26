@@ -1,5 +1,6 @@
 using System.Windows;
 using Biaschtln.Statistics.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Biaschtln.Statistics;
 
@@ -13,4 +14,13 @@ public partial class MainWindow : Window
         InitializeComponent();
         DataContext = viewModel;
     }
+
+    private void OnShowAbout(object sender, RoutedEventArgs e)
+    {
+        var dialog = App.Current.Services.GetRequiredService<AboutWindow>();
+        dialog.Owner = this;
+        dialog.ShowDialog();
+    }
+
+    private void OnExit(object sender, RoutedEventArgs e) => Application.Current.Shutdown();
 }

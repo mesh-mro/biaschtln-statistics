@@ -16,7 +16,11 @@ public sealed class AnalyticsViewModelTests
 
         public event EventHandler? OrdersChanged;
 
-        public ImportResult LoadFiles(IEnumerable<string> paths) => throw new NotSupportedException();
+        public IReadOnlyList<LoadedFileInfo> LoadedFiles { get; } = [];
+
+        public ImportResult LoadFiles(IEnumerable<string> paths, bool append = false) => throw new NotSupportedException();
+
+        public void RemoveFile(string filePath) => throw new NotSupportedException();
 
         public void Clear()
         {
@@ -91,6 +95,7 @@ public sealed class AnalyticsViewModelTests
     {
         var (vm, data, _) = CreateVm();
         data.Set(Sample());
+        vm.Metric = ChartMetric.Revenue; // Standard ist jetzt Positionen.
 
         // cash = Bier 4,5 + Cola 3 = 7,5 · card = Schnitzel 9. Storno zählt nicht.
         Assert.Equal(2, vm.PaymentSeries.Count);
@@ -103,6 +108,7 @@ public sealed class AnalyticsViewModelTests
     {
         var (vm, data, _) = CreateVm();
         data.Set(Sample());
+        vm.Metric = ChartMetric.Revenue; // Standard ist jetzt Positionen.
 
         // A1 = 4,5 + 9 = 13,5 · B5 = 3 (Storno auf B5 ausgeschlossen).
         Assert.Equal([13.5d, 3d], ColumnValues(vm.TableSeries));
@@ -114,8 +120,11 @@ public sealed class AnalyticsViewModelTests
         var (vm, data, _) = CreateVm();
         data.Set(Sample());
 
-        // Standard = 15 Minuten: 18:00 (4,5), 19:00 (9), 12:00 (3) → 3 chronologische Punkte
-        // (Storno um 12:30 ausgeschlossen).
+        // Kennzahl Umsatz setzen (Standard ist jetzt Positionen).
+        vm.Metric = ChartMetric.Revenue;
+
+        // Standard-Intervall = 15 Minuten: 18:00 (4,5), 19:00 (9), 12:00 (3) → 3 chronologische
+        // Punkte (Storno um 12:30 ausgeschlossen).
         Assert.Equal(TimeBucket.QuarterHour, vm.TimeBucket);
         Assert.Equal([4.5d, 9d, 3d], TimeSeriesValues(vm.RevenueOverTimeSeries));
 
@@ -166,6 +175,7 @@ public sealed class AnalyticsViewModelTests
             LineU("Essen", 5m, "A1", "Abholstation"), // Abholung → zählt nicht zu A1
             LineU("Alk", 4m, "B5", "Kellner 2"),
         ]);
+        vm.Metric = ChartMetric.Revenue; // Standard ist jetzt Positionen.
 
         // Standard-Abholstation ausgeschlossen: A1 = 9 (nicht 14), B5 = 4.
         Assert.Equal([9d, 4d], ColumnValues(vm.TableSeries));

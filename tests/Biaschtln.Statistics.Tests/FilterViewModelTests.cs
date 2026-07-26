@@ -13,7 +13,11 @@ public sealed class FilterViewModelTests
 
         public event EventHandler? OrdersChanged;
 
-        public ImportResult LoadFiles(IEnumerable<string> paths) => throw new NotSupportedException();
+        public IReadOnlyList<LoadedFileInfo> LoadedFiles { get; } = [];
+
+        public ImportResult LoadFiles(IEnumerable<string> paths, bool append = false) => throw new NotSupportedException();
+
+        public void RemoveFile(string filePath) => throw new NotSupportedException();
 
         public void Clear()
         {
@@ -28,7 +32,8 @@ public sealed class FilterViewModelTests
         }
     }
 
-    private static OrderLine Line(string category, string article, string table, string user, string? payment) =>
+    private static OrderLine Line(string category, string article, string table, string user, string? payment,
+        string? sourceFile = null) =>
         new()
         {
             Category = category,
@@ -36,14 +41,15 @@ public sealed class FilterViewModelTests
             Table = table,
             User = user,
             PaymentMethod = payment,
+            SourceFile = sourceFile ?? string.Empty,
             Status = "ORDER: CREATED - Bestellung erfasst",
         };
 
     private static List<OrderLine> Sample() =>
     [
-        Line("Alk", "Bier 0,5", "A1", "K2", "cash"),
-        Line("Essen", "Schnitzel", "A1", "K1", "card"),
-        Line("Alk", "Bier 0,5", "B5", "K1", null),
+        Line("Alk", "Bier 0,5", "A1", "K2", "cash", sourceFile: "tag1.csv"),
+        Line("Essen", "Schnitzel", "A1", "K1", "card", sourceFile: "tag1.csv"),
+        Line("Alk", "Bier 0,5", "B5", "K1", null, sourceFile: "tag2.csv"),
     ];
 
     [Fact]
@@ -72,14 +78,27 @@ public sealed class FilterViewModelTests
         vm.Categories.First(o => o.Name == "Alk").IsSelected = true;
         vm.IncludeCanceled = true;
         vm.Paid = PaidFilter.OnlyPaid;
-        vm.From = new DateTime(2026, 5, 9, 0, 0, 0);
+        vm.SelectedFile = "tag1.csv";
 
         var filter = vm.BuildFilter();
 
         Assert.Equal(["Alk"], filter.Categories);
         Assert.True(filter.IncludeCanceled);
         Assert.Equal(PaidFilter.OnlyPaid, filter.Paid);
-        Assert.Equal(new DateTime(2026, 5, 9, 0, 0, 0), filter.From);
+        Assert.Equal("tag1.csv", filter.File);
+    }
+
+    [Fact]
+    public void SyncFiles_BuildsFileListWithSentinel_AndDefaultsToAll()
+    {
+        var data = new FakeOrderData();
+        var vm = new FilterViewModel(data, new PickupSettings());
+        data.Set(Sample());
+
+        Assert.Equal([FilterViewModel.AllFiles, "tag1.csv", "tag2.csv"], vm.Files);
+        Assert.Equal(FilterViewModel.AllFiles, vm.SelectedFile);
+        // "Alle Dateien" bedeutet kein Datei-Filter.
+        Assert.Null(vm.BuildFilter().File);
     }
 
     [Fact]

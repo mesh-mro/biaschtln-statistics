@@ -25,11 +25,17 @@ public partial class FilterViewModel : ObservableObject
         RebuildOptions();
     }
 
+    /// <summary>Sentinel-Eintrag der Datei-Auswahl: zeigt alle geladenen Dateien.</summary>
+    public const string AllFiles = "(Alle Dateien)";
+
     public ObservableCollection<SelectableOption> Categories { get; } = [];
     public ObservableCollection<SelectableOption> Articles { get; } = [];
     public ObservableCollection<SelectableOption> Tables { get; } = [];
     public ObservableCollection<SelectableOption> Users { get; } = [];
     public ObservableCollection<SelectableOption> PaymentMethods { get; } = [];
+
+    /// <summary>Auswahlliste der Dateien (Sentinel "Alle Dateien" + je geladene Datei).</summary>
+    public ObservableCollection<string> Files { get; } = [AllFiles];
 
     /// <summary>Benutzernamen (für die Abholstation-Auswahl).</summary>
     public ObservableCollection<string> UserNames { get; } = [];
@@ -53,11 +59,9 @@ public partial class FilterViewModel : ObservableObject
         }
     }
 
+    /// <summary>Ausgewählte Datei; <see cref="AllFiles"/> = alle Dateien anzeigen.</summary>
     [ObservableProperty]
-    private DateTime? _from;
-
-    [ObservableProperty]
-    private DateTime? _to;
+    private string? _selectedFile = AllFiles;
 
     [ObservableProperty]
     private bool _includeCanceled;
@@ -73,8 +77,7 @@ public partial class FilterViewModel : ObservableObject
     {
         var filter = new OrderFilter
         {
-            From = From,
-            To = To,
+            File = SelectedFile == AllFiles ? null : SelectedFile,
             IncludeCanceled = IncludeCanceled,
             Paid = Paid,
             PickupUser = _pickup.PickupUser,
@@ -95,8 +98,7 @@ public partial class FilterViewModel : ObservableObject
         _suppressChangeEvents = true;
         try
         {
-            From = null;
-            To = null;
+            SelectedFile = AllFiles;
             IncludeCanceled = false;
             Paid = PaidFilter.All;
             foreach (var option in AllOptions())
@@ -126,6 +128,7 @@ public partial class FilterViewModel : ObservableObject
                 .Where(m => !string.IsNullOrWhiteSpace(m))
                 .Cast<string>());
             SyncNames(UserNames, _data.Orders.Select(o => o.User));
+            SyncFiles();
         }
         finally
         {
@@ -156,6 +159,32 @@ public partial class FilterViewModel : ObservableObject
         }
     }
 
+    /// <summary>
+    /// Aktualisiert die Datei-Auswahl auf die in den Daten vorkommenden Quelldateien
+    /// (Sentinel "Alle Dateien" bleibt erster Eintrag) und erhält die bisherige Auswahl,
+    /// falls die Datei noch existiert — sonst zurück auf "Alle Dateien".
+    /// </summary>
+    private void SyncFiles()
+    {
+        var previous = SelectedFile;
+
+        var distinct = _data.Orders
+            .Select(o => o.SourceFile)
+            .Where(f => !string.IsNullOrEmpty(f))
+            .Distinct()
+            .OrderBy(f => f, StringComparer.CurrentCulture)
+            .ToList();
+
+        Files.Clear();
+        Files.Add(AllFiles);
+        foreach (var file in distinct)
+        {
+            Files.Add(file);
+        }
+
+        SelectedFile = previous is not null && Files.Contains(previous) ? previous : AllFiles;
+    }
+
     /// <summary>Aktualisiert eine String-Liste auf die eindeutigen, sortierten Werte.</summary>
     private static void SyncNames(ObservableCollection<string> target, IEnumerable<string> values)
     {
@@ -178,9 +207,7 @@ public partial class FilterViewModel : ObservableObject
         }
     }
 
-    partial void OnFromChanged(DateTime? value) => RaiseFilterChanged();
-
-    partial void OnToChanged(DateTime? value) => RaiseFilterChanged();
+    partial void OnSelectedFileChanged(string? value) => RaiseFilterChanged();
 
     partial void OnIncludeCanceledChanged(bool value) => RaiseFilterChanged();
 

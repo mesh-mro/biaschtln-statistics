@@ -95,12 +95,12 @@ public sealed partial class AnalyticsViewModel : FilteredChartViewModel
     [ObservableProperty]
     private TimeBucket _timeBucket = TimeBucket.QuarterHour;
 
-    /// <summary>Kennzahl (Umsatz oder Positionen) für die quantitativen Diagramme.</summary>
+    /// <summary>Kennzahl (Umsatz oder Positionen) für die quantitativen Diagramme; Standard: Positionen.</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(MetricLabel))]
     [NotifyPropertyChangedFor(nameof(TimeChartTitle))]
     [NotifyPropertyChangedFor(nameof(TableChartTitle))]
-    private ChartMetric _metric = ChartMetric.Revenue;
+    private ChartMetric _metric = ChartMetric.Count;
 
     /// <summary>Aktueller Kennzahlname ("Umsatz" oder "Positionen").</summary>
     public string MetricLabel => Metric == ChartMetric.Revenue ? "Umsatz" : "Positionen";
@@ -182,7 +182,7 @@ public sealed partial class AnalyticsViewModel : FilteredChartViewModel
         });
 
         _timeYAxis.Labeler = AmountLabeler(isRevenue);
-        ConfigureTimeAxis();
+        ConfigureTimeAxis(orders);
     }
 
     private void BuildPaymentDonut(IReadOnlyList<OrderLine> orders)
@@ -301,19 +301,20 @@ public sealed partial class AnalyticsViewModel : FilteredChartViewModel
 
     /// <summary>
     /// Konfiguriert die lineare Zeitachse: Ticks-basierte Beschriftung, Schrittweite je
-    /// Intervall und die Spannweite über den gesamten Datensatz (erste..letzte Bestellung).
+    /// Intervall und die Spannweite über die <paramref name="orders"/> der aktuellen Auswahl
+    /// (erste..letzte Bestellung). So zeigt die Achse bei ausgewählter Datei nur deren Zeitraum.
     /// </summary>
-    private void ConfigureTimeAxis()
+    private void ConfigureTimeAxis(IReadOnlyList<OrderLine> orders)
     {
         var unit = UnitTicks(TimeBucket);
         _timeXAxis.Labeler = value => FormatBucket(TicksToDate(value));
         _timeXAxis.UnitWidth = unit;
         _timeXAxis.MinStep = unit;
 
-        if (AllOrders.Count > 0)
+        if (orders.Count > 0)
         {
-            _timeXAxis.MinLimit = AllOrders.Min(o => o.OrderedAt).Ticks;
-            _timeXAxis.MaxLimit = AllOrders.Max(o => o.OrderedAt).Ticks;
+            _timeXAxis.MinLimit = orders.Min(o => o.OrderedAt).Ticks;
+            _timeXAxis.MaxLimit = orders.Max(o => o.OrderedAt).Ticks;
         }
         else
         {

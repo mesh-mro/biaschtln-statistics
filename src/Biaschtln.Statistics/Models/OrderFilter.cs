@@ -19,11 +19,11 @@ public enum PaidFilter
 /// </summary>
 public sealed class OrderFilter
 {
-    /// <summary>Untere Zeitgrenze (inklusive), oder null für unbegrenzt.</summary>
-    public DateTime? From { get; set; }
-
-    /// <summary>Obere Zeitgrenze (inklusive), oder null für unbegrenzt.</summary>
-    public DateTime? To { get; set; }
+    /// <summary>
+    /// Ausgewählte Quelldatei (Dateiname). Null/leer = alle Dateien anzeigen. Ersetzt den
+    /// früheren Zeitraum-Filter, da eine Datei typischerweise einer Veranstaltung entspricht.
+    /// </summary>
+    public string? File { get; set; }
 
     /// <summary>Erlaubte Kategorien (leer = alle).</summary>
     public ISet<string> Categories { get; } = new HashSet<string>();

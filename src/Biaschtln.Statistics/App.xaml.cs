@@ -21,6 +21,12 @@ public partial class App : Application
         _services = services.BuildServiceProvider();
     }
 
+    /// <summary>Aktuelle App-Instanz (für Code-Behind, das Dialoge aus dem DI-Container auflöst).</summary>
+    public static new App Current => (App)Application.Current;
+
+    /// <summary>DI-Container zum Auflösen von Fenstern/ViewModels aus dem Code-Behind.</summary>
+    public IServiceProvider Services => _services;
+
     /// <summary>
     /// Zentrale Registrierung von Services und ViewModels. Wird in den folgenden
     /// Arbeitspaketen (CSV-Import, Statistik, Filter, weitere ViewModels) erweitert.
@@ -44,6 +50,10 @@ public partial class App : Application
         services.AddSingleton<OrdersTableViewModel>();
         services.AddSingleton<MainViewModel>();
         services.AddSingleton<MainWindow>();
+
+        // Info-Dialog (bei Bedarf neu erzeugt).
+        services.AddTransient<AboutViewModel>();
+        services.AddTransient<AboutWindow>();
     }
 
     protected override void OnStartup(StartupEventArgs e)

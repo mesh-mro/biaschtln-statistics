@@ -15,7 +15,11 @@ public sealed class PreparationStaffViewModelTests
 
         public event EventHandler? OrdersChanged;
 
-        public ImportResult LoadFiles(IEnumerable<string> paths) => throw new NotSupportedException();
+        public IReadOnlyList<LoadedFileInfo> LoadedFiles { get; } = [];
+
+        public ImportResult LoadFiles(IEnumerable<string> paths, bool append = false) => throw new NotSupportedException();
+
+        public void RemoveFile(string filePath) => throw new NotSupportedException();
 
         public void Clear()
         {
@@ -91,7 +95,8 @@ public sealed class PreparationStaffViewModelTests
         var (vm, data, _) = CreateVm();
         data.Set(Sample());
 
-        // Standard: Positionen je Benutzer, nach Anzahl absteigend.
+        // Kennzahl Positionen: je Benutzer, nach Anzahl absteigend (Standard ist jetzt Umsatz).
+        vm.Metric = ChartMetric.Count;
         Assert.Equal([3d, 2d, 1d], ColumnValues(vm.StaffSeries));
         Assert.Equal(["K1", "K2", "K3"], Labels(vm.StaffXAxes));
     }
@@ -114,6 +119,7 @@ public sealed class PreparationStaffViewModelTests
     {
         var (vm, data, filter) = CreateVm();
         data.Set(Sample());
+        vm.Metric = ChartMetric.Count; // Personal-Standard ist jetzt Umsatz.
 
         filter.Users.Single(o => o.Name == "K1").IsSelected = true;
 
@@ -131,7 +137,8 @@ public sealed class PreparationStaffViewModelTests
         data.Set(Sample());
         Assert.True(vm.HasData);
 
-        filter.From = new DateTime(2099, 1, 1, 0, 0, 0);
+        // Nicht vorhandene Datei → leere Menge.
+        filter.SelectedFile = "gibt-es-nicht.csv";
 
         Assert.False(vm.HasData);
         Assert.Empty(vm.PreparationSeries.SelectMany(s => ((ColumnSeries<double>)s).Values!));

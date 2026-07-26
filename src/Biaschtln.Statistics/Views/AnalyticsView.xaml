@@ -19,11 +19,11 @@
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
                 <TextBlock Text="Kennzahl:" VerticalAlignment="Center"
                            Foreground="#757575" Margin="0,0,8,0" />
-                <RadioButton Content="Umsatz" GroupName="metric" Margin="0,0,10,0"
+                <RadioButton Content="Umsatz" GroupName="analyticsMetric" Margin="0,0,10,0"
                              VerticalAlignment="Center"
                              IsChecked="{Binding Metric, Converter={StaticResource EnumToBool},
                                          ConverterParameter={x:Static vm:ChartMetric.Revenue}}" />
-                <RadioButton Content="Positionen" GroupName="metric"
+                <RadioButton Content="Positionen" GroupName="analyticsMetric"
                              VerticalAlignment="Center"
                              IsChecked="{Binding Metric, Converter={StaticResource EnumToBool},
                                          ConverterParameter={x:Static vm:ChartMetric.Count}}" />

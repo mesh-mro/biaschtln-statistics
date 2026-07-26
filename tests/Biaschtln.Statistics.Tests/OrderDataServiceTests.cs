@@ -43,4 +43,67 @@ public sealed class OrderDataServiceTests
         service.Clear();
         Assert.Equal(1, raisedAfterLoad);
     }
+
+    [Fact]
+    public void LoadFiles_Append_AddsToExistingInsteadOfReplacing()
+    {
+        var samples = AllSamples();
+        var (first, second) = (samples[0], samples[1]);
+        var firstCount = SingleFileRowCount(first);
+        var secondCount = SingleFileRowCount(second);
+
+        var service = CreateService();
+        service.LoadFiles([first]); // Ersetzen (leerer Bestand)
+        var raisedAfterFirst = 0;
+        service.OrdersChanged += (_, _) => raisedAfterFirst++;
+
+        service.LoadFiles([second], append: true);
+
+        Assert.Equal(firstCount + secondCount, service.Orders.Count);
+        Assert.Equal(2, service.LoadedFiles.Count);
+        Assert.Equal(1, raisedAfterFirst);
+        Assert.Contains(service.LoadedFiles, f => f.FileName == Path.GetFileName(first) && f.RowCount == firstCount);
+        Assert.Contains(service.LoadedFiles, f => f.FileName == Path.GetFileName(second) && f.RowCount == secondCount);
+    }
+
+    [Fact]
+    public void RemoveFile_RemovesOnlyThatFilesRows_AndRaisesEventOnce()
+    {
+        var samples = AllSamples();
+        var (first, second) = (samples[0], samples[1]);
+        var secondCount = SingleFileRowCount(second);
+
+        var service = CreateService();
+        service.LoadFiles([first, second]);
+
+        var raised = 0;
+        service.OrdersChanged += (_, _) => raised++;
+
+        service.RemoveFile(first);
+
+        Assert.Equal(secondCount, service.Orders.Count);
+        Assert.Single(service.LoadedFiles);
+        Assert.Equal(Path.GetFileName(second), service.LoadedFiles[0].FileName);
+        Assert.Equal(1, raised);
+
+        // Entfernen eines unbekannten Pfads löst kein Event aus.
+        service.RemoveFile("gibt-es-nicht.csv");
+        Assert.Equal(1, raised);
+    }
+
+    [Fact]
+    public void LoadFiles_Append_SameFileTwice_ReplacesSegmentWithoutDuplicating()
+    {
+        var first = AllSamples()[0];
+        var firstCount = SingleFileRowCount(first);
+
+        var service = CreateService();
+        service.LoadFiles([first]);
+        service.LoadFiles([first], append: true);
+
+        Assert.Equal(firstCount, service.Orders.Count);
+        Assert.Single(service.LoadedFiles);
+    }
+
+    private static int SingleFileRowCount(string path) => CreateService().LoadFiles([path]).Orders.Count;
 }

@@ -61,6 +61,12 @@ public sealed class OrderLine
     public int? PreparationSeconds { get; set; }
 
     /// <summary>
+    /// Name der Quelldatei (z. B. "tag1.csv"). Kein CSV-Feld — wird beim Import gestempelt und
+    /// dient dem Datei-Filter (eine Datei = typischerweise ein Veranstaltungstag).
+    /// </summary>
+    public string SourceFile { get; set; } = string.Empty;
+
+    /// <summary>
     /// True, wenn die Position storniert wurde (Status enthält STORNO/CANCELED).
     /// Solche Positionen werden bei der Umsatzberechnung standardmäßig ausgeschlossen.
     /// </summary>

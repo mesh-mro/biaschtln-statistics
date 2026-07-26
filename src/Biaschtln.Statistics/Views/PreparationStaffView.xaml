@@ -44,14 +44,14 @@
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <TextBlock Text="Kennzahl:" VerticalAlignment="Center"
                                Foreground="#757575" Margin="0,0,8,0" />
-                    <RadioButton Content="Positionen" GroupName="metric" Margin="0,0,10,0"
-                                 VerticalAlignment="Center"
-                                 IsChecked="{Binding Metric, Converter={StaticResource EnumToBool},
-                                             ConverterParameter={x:Static vm:ChartMetric.Count}}" />
-                    <RadioButton Content="Umsatz" GroupName="metric"
+                    <RadioButton Content="Umsatz" GroupName="staffMetric" Margin="0,0,10,0"
                                  VerticalAlignment="Center"
                                  IsChecked="{Binding Metric, Converter={StaticResource EnumToBool},
                                              ConverterParameter={x:Static vm:ChartMetric.Revenue}}" />
+                    <RadioButton Content="Positionen" GroupName="staffMetric"
+                                 VerticalAlignment="Center"
+                                 IsChecked="{Binding Metric, Converter={StaticResource EnumToBool},
+                                             ConverterParameter={x:Static vm:ChartMetric.Count}}" />
                 </StackPanel>
             </Grid>
             <lvc:CartesianChart Series="{Binding StaffSeries}"

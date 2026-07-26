@@ -44,7 +44,7 @@ public partial class MainViewModel : ObservableObject
         OrdersTable = ordersTable;
 
         Filter.FilterChanged += (_, _) => RecomputeKpis();
-        _data.OrdersChanged += (_, _) => RecomputeKpis();
+        _data.OrdersChanged += (_, _) => OnOrdersChanged();
         RecomputeKpis();
     }
 
@@ -65,8 +65,12 @@ public partial class MainViewModel : ObservableObject
     /// <summary>ViewModel der Datentabelle (alle gefilterten Positionen).</summary>
     public OrdersTableViewModel OrdersTable { get; }
 
-    /// <summary>Namen der zuletzt geladenen Dateien.</summary>
-    public ObservableCollection<string> LoadedFiles { get; } = [];
+    /// <summary>Aktuell geladene Dateien (Name + Positionsanzahl) für die Übersicht.</summary>
+    public ObservableCollection<LoadedFileInfo> LoadedFiles { get; } = [];
+
+    /// <summary>True, wenn mindestens eine Datei geladen ist (aktiviert Menüpunkte).</summary>
+    [ObservableProperty]
+    private bool _hasLoadedFiles;
 
     [ObservableProperty]
     private string _statusMessage = "Noch keine Dateien geladen.";
@@ -86,8 +90,40 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private string _revenueText = FormatCurrency(0m);
 
+    /// <summary>Öffnet Dateien und hängt sie an den bestehenden Bestand an.</summary>
     [RelayCommand]
-    private void OpenFiles()
+    private void AddFiles() => OpenFiles(append: true);
+
+    /// <summary>Öffnet Dateien und ersetzt den bestehenden Bestand.</summary>
+    [RelayCommand]
+    private void ReplaceFiles() => OpenFiles(append: false);
+
+    /// <summary>Entfernt eine einzelne geladene Datei aus dem Bestand.</summary>
+    [RelayCommand]
+    private void RemoveFile(LoadedFileInfo? file)
+    {
+        if (file is null)
+        {
+            return;
+        }
+
+        _data.RemoveFile(file.FilePath);
+        HasError = false;
+        StatusMessage = _data.LoadedFiles.Count == 0
+            ? "Noch keine Dateien geladen."
+            : CurrentStoreStatus();
+    }
+
+    /// <summary>Verwirft alle geladenen Dateien.</summary>
+    [RelayCommand]
+    private void Clear()
+    {
+        _data.Clear();
+        HasError = false;
+        StatusMessage = "Noch keine Dateien geladen.";
+    }
+
+    private void OpenFiles(bool append)
     {
         var paths = _fileDialog.OpenFiles(CsvFilter, multiselect: true);
         if (paths is null || paths.Count == 0)
@@ -95,31 +131,43 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
-        LoadPaths(paths);
+        LoadPaths(paths, append);
     }
 
     /// <summary>
     /// Lädt die angegebenen CSV-Pfade und aktualisiert Status, Dateiliste und (über das
-    /// OrdersChanged-Event) die KPIs. Auch für das Vorladen per Startargument nutzbar.
+    /// OrdersChanged-Event) die KPIs. Bei <paramref name="append"/> werden die Dateien an den
+    /// bestehenden Bestand angehängt. Auch für das Vorladen per Startargument nutzbar.
     /// </summary>
-    public void LoadPaths(IReadOnlyList<string> paths)
+    public void LoadPaths(IReadOnlyList<string> paths, bool append = false)
     {
         if (paths.Count == 0)
         {
             return;
         }
 
-        var result = _data.LoadFiles(paths);
-
-        LoadedFiles.Clear();
-        foreach (var file in result.Files)
-        {
-            LoadedFiles.Add(Path.GetFileName(file.FilePath));
-        }
+        var result = _data.LoadFiles(paths, append);
 
         HasError = !result.AllSucceeded;
         StatusMessage = BuildStatusMessage(result);
-        // KPIs werden über das OrdersChanged-Event neu berechnet.
+        // KPIs und Dateiliste werden über das OrdersChanged-Event aktualisiert.
+    }
+
+    private void OnOrdersChanged()
+    {
+        RecomputeKpis();
+        RefreshLoadedFiles();
+    }
+
+    private void RefreshLoadedFiles()
+    {
+        LoadedFiles.Clear();
+        foreach (var file in _data.LoadedFiles)
+        {
+            LoadedFiles.Add(file);
+        }
+
+        HasLoadedFiles = LoadedFiles.Count > 0;
     }
 
     private void RecomputeKpis()
@@ -131,19 +179,20 @@ public partial class MainViewModel : ObservableObject
         RevenueText = FormatCurrency(_statistics.TotalRevenue(filtered));
     }
 
-    private static string BuildStatusMessage(ImportResult result)
+    private string CurrentStoreStatus() =>
+        $"{_data.LoadedFiles.Count} Datei(en) · {_data.Orders.Count} Positionen.";
+
+    private string BuildStatusMessage(ImportResult result)
     {
-        var ok = result.Files.Count(f => f.Success);
-        var rows = result.Files.Where(f => f.Success).Sum(f => f.RowCount);
         if (result.AllSucceeded)
         {
-            return $"{ok} Datei(en) geladen · {rows} Positionen.";
+            return CurrentStoreStatus();
         }
 
         var failed = result.Files
             .Where(f => !f.Success)
             .Select(f => $"{Path.GetFileName(f.FilePath)}: {f.Error}");
-        return $"{ok} Datei(en) geladen · Fehler bei: {string.Join("; ", failed)}";
+        return $"{CurrentStoreStatus()} Fehler bei: {string.Join("; ", failed)}";
     }
 
     private static string FormatCurrency(decimal value) => value.ToString("C2", GermanCulture);

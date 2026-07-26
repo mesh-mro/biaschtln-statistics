@@ -5,6 +5,7 @@ using Biaschtln.Statistics.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LiveChartsCore;
+using LiveChartsCore.Drawing;
 using LiveChartsCore.Kernel.Sketches;
 using LiveChartsCore.Measure;
 using LiveChartsCore.SkiaSharpView;
@@ -80,9 +81,9 @@ public sealed partial class PreparationStaffViewModel : FilteredChartViewModel
 
     public IReadOnlyList<ICartesianAxis> StaffYAxes { get; }
 
-    /// <summary>Umschaltung Personal-Kennzahl (Positionen oder Umsatz).</summary>
+    /// <summary>Umschaltung Personal-Kennzahl (Positionen oder Umsatz); Standard: Umsatz.</summary>
     [ObservableProperty]
-    private ChartMetric _metric = ChartMetric.Count;
+    private ChartMetric _metric = ChartMetric.Revenue;
 
     /// <summary>False, wenn die gefilterte Menge leer ist (steuert die Leer-Anzeige).</summary>
     [ObservableProperty]
@@ -137,7 +138,9 @@ public sealed partial class PreparationStaffViewModel : FilteredChartViewModel
             },
         });
 
-        // Unsichtbares Overlay: schreibt die Max-Dauer mittig in den Balken (nicht interaktiv).
+        // Max-Dauer mittig im Balken, zweizeilig: Beschriftung "max" über dem Wert.
+        // LiveCharts-Labels sind einzeilig (\n greift nicht) → zwei unsichtbare Overlay-Serien,
+        // vertikal über DataLabelsTranslate (Einheit = Label-Höhe) gegeneinander versetzt.
         PreparationSeries.Add(new ColumnSeries<double>
         {
             Values = averages,
@@ -150,8 +153,23 @@ public sealed partial class PreparationStaffViewModel : FilteredChartViewModel
             DataLabelsPaint = new SolidColorPaint(ChartPalette.OnFill),
             DataLabelsSize = 11,
             DataLabelsPosition = DataLabelsPosition.Middle,
+            DataLabelsTranslate = new LvcPoint(0, 0.6f),
             DataLabelsFormatter = point =>
-                "max " + FormatDuration(prep[(int)point.Coordinate.SecondaryValue].MaxSeconds),
+                FormatDuration(prep[(int)point.Coordinate.SecondaryValue].MaxSeconds),
+        });
+        PreparationSeries.Add(new ColumnSeries<double>
+        {
+            Values = averages,
+            Fill = new SolidColorPaint(SKColors.Transparent),
+            Stroke = null,
+            IgnoresBarPosition = true,
+            IsHoverable = false,
+            IsVisibleAtLegend = false,
+            DataLabelsPaint = new SolidColorPaint(ChartPalette.OnFill),
+            DataLabelsSize = 11,
+            DataLabelsPosition = DataLabelsPosition.Middle,
+            DataLabelsTranslate = new LvcPoint(0, -0.6f),
+            DataLabelsFormatter = _ => "max",
         });
 
         _prepXAxis.Labels = prep.Select(p => p.Article).ToList();
